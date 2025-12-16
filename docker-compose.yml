@@ -1,0 +1,29 @@
+services:
+  meetingsystem.api:
+    image: ${DOCKER_REGISTRY-}meetingsystemapi
+    build:
+      context: .
+      dockerfile: MeetingSystem.API/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIROMENT=Development
+      - ConnectionStrings
+    ports:
+      - "8080:8080"
+    depends_on:
+      - meetingsystem.db
+
+  meetingsystem.db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: meetingsystem_sql_server
+    user: root
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=wfuZbFvsG3@2J#
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql/data
+
+volumes:
+  mssql_data:
+

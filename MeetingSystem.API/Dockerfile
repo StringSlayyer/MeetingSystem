@@ -13,6 +13,10 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["MeetingSystem.API/MeetingSystem.API.csproj", "MeetingSystem.API/"]
+COPY ["MeetingSystem.Application/MeetingSystem.Application.csproj", "MeetingSystem.Application/"]
+COPY ["MeetingSystem.Domain/MeetingSystem.Domain.csproj", "MeetingSystem.Domain/"]
+COPY ["MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj", "MeetingSystem.Infrastructure/"]
+COPY ["SharedKernel/SharedKernel.csproj", "SharedKernel/"]
 RUN dotnet restore "./MeetingSystem.API/MeetingSystem.API.csproj"
 COPY . .
 WORKDIR "/src/MeetingSystem.API"
