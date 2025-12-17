@@ -2,9 +2,9 @@
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
-  <Project Path="MeetingSystem.API/MeetingSystem.API.csproj" Id="8772cfd3-c2e3-4e93-8c2c-4153a0d6a9bb" />
-  <Project Path="MeetingSystem.Application/MeetingSystem.Application.csproj" Id="a5bad8ca-b3d6-4846-96af-c09d95f6f735" />
-  <Project Path="MeetingSystem.Domain/MeetingSystem.Domain.csproj" Id="bd38b85a-1efc-4a09-93bf-ab0a96a043a7" />
-  <Project Path="MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj" Id="193bffe8-7982-4d69-8f1d-ad402fdc3179" />
-  <Project Path="SharedKernel/SharedKernel.csproj" Id="c887d267-30cc-4471-b912-bd655f16df6b" />
+  <Project Path="src/MeetingSystem.API/MeetingSystem.API.csproj" />
+  <Project Path="src/MeetingSystem.Application/MeetingSystem.Application.csproj" />
+  <Project Path="src/MeetingSystem.Domain/MeetingSystem.Domain.csproj" />
+  <Project Path="src/MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj" />
+  <Project Path="src/SharedKernel/SharedKernel.csproj" />
 </Solution>

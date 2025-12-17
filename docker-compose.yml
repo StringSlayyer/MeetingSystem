@@ -3,7 +3,7 @@ services:
     image: ${DOCKER_REGISTRY-}meetingsystemapi
     build:
       context: .
-      dockerfile: MeetingSystem.API/Dockerfile
+      dockerfile: src/MeetingSystem.API/Dockerfile
     environment:
       - ASPNETCORE_ENVIROMENT=Development
       - ConnectionStrings
