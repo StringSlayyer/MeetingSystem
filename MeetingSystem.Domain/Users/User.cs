@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SharedKernel;
 
-namespace MeetingSystem.Domain.User
+namespace MeetingSystem.Domain.Users
 {
-    public sealed class User
+    public sealed class User : Entity
     {
         public Guid Id { get; set; }
         public string Email { get; set; }
