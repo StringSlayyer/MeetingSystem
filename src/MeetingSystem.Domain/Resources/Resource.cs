@@ -32,7 +32,7 @@ namespace MeetingSystem.Domain.Resources
             var reservation = new Reservation(this.Id, user.Id, timeSlot);
             _reservations.Add(reservation);
 
-            AddDomainEvent(new ReservationCreatedDomainEvent(reservation))
+           // AddDomainEvent(new ReservationCreatedDomainEvent(reservation))
         }
     }
 }

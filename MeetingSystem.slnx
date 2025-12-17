@@ -1,10 +1,12 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MeetingSystem.API/MeetingSystem.API.csproj" />
+    <Project Path="src/MeetingSystem.Application/MeetingSystem.Application.csproj" />
+    <Project Path="src/MeetingSystem.Domain/MeetingSystem.Domain.csproj" />
+    <Project Path="src/MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj" />
+    <Project Path="src/SharedKernel/SharedKernel.csproj" />
+  </Folder>
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>
-  <Project Path="src/MeetingSystem.API/MeetingSystem.API.csproj" />
-  <Project Path="src/MeetingSystem.Application/MeetingSystem.Application.csproj" />
-  <Project Path="src/MeetingSystem.Domain/MeetingSystem.Domain.csproj" />
-  <Project Path="src/MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj" />
-  <Project Path="src/SharedKernel/SharedKernel.csproj" />
 </Solution>

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using SharedKernel;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MeetingSystem.Infrastructure.Persistence
 {
-    internal class ApplicationDbContext
+    public sealed class ApplicationDbContext
     {
     }
 }
