@@ -6,7 +6,6 @@ services:
       dockerfile: src/MeetingSystem.API/Dockerfile
     environment:
       - ASPNETCORE_ENVIROMENT=Development
-      - ConnectionStrings
     ports:
       - "8080:8080"
       - "8081:8081" 

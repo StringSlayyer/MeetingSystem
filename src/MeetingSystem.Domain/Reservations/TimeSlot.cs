@@ -9,6 +9,9 @@ namespace MeetingSystem.Domain.Reservations
     {
         public DateTime Start { get; }
         public DateTime End { get; }
+
+        private TimeSlot() { }
+
         public TimeSlot(DateTime start, DateTime end)
         {
             if (end <= start) throw new InvalidOperationException("End time must be after a start time");

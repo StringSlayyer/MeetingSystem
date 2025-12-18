@@ -11,6 +11,9 @@ namespace MeetingSystem.Domain.Reservations
         public static readonly ReservationStatus Cancelled = new(3, "Cancelled");
         public int Id { get; }
         public string Name { get; }
+
+        public ReservationStatus(){}
+
         public ReservationStatus(int id, string name)
         {
             Id = id;
@@ -23,6 +26,8 @@ namespace MeetingSystem.Domain.Reservations
             if (this == Confirmed && next == Pending) return false;
             return true;
         }
+
+        
 
         
         public static IEnumerable<ReservationStatus> List() =>

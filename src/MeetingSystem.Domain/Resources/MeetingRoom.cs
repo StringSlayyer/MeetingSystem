@@ -8,7 +8,8 @@ namespace MeetingSystem.Domain.Resources
     {
         public int Seats { get; private set; }
         public MeetingRoom() { }
-        public MeetingRoom(int seats)
+        public MeetingRoom(string name, Guid companyId, int seats)
+            : base(name, companyId)
         {
             this.Seats = seats;
         }
