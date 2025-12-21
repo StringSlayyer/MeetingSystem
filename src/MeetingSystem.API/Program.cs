@@ -1,4 +1,5 @@
 using MeetingSystem.API.Extensions;
+using MeetingSystem.API.Middlewares;
 using MeetingSystem.Application;
 using MeetingSystem.Infrastructure;
 
@@ -22,12 +23,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.ApplyMigrations();
+    //app.ApplyMigrations();
 }
 
 //app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseMiddleware<JwtMiddleware>();
 
 app.MapControllers();
 

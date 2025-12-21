@@ -6,6 +6,10 @@ services:
       dockerfile: src/MeetingSystem.API/Dockerfile
     environment:
       - ASPNETCORE_ENVIROMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=meetingsystem.db,1433;Database=MeetingSystemDb;User Id=sa;Password=wfuZbFvsG3@2J#;TrustServerCertificate=True;
+      - JWT_ISSUER=localhost
+      - JWT_AUDIENCE=localhost
+      - JWT_SECRET_KEY=GMAY*XAxuVv3Y5njS4JWJa$n4$EYd!iL$uTxat5hAJ&Ugf3By%tiWmHPKHpCr7f6
     ports:
       - "8080:8080"
       - "8081:8081" 

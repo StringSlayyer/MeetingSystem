@@ -1,6 +1,10 @@
 ﻿using MeetingSystem.Application.Abstractions.Data;
+using MeetingSystem.Application.Abstractions.Messaging;
+using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Infrastructure.DomainEvents;
+using MeetingSystem.Infrastructure.Messaging;
 using MeetingSystem.Infrastructure.Persistence;
+using MeetingSystem.Infrastructure.Services;
 using MeetingSystem.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +27,9 @@ namespace MeetingSystem.Infrastructure
         {
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
             services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+            services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IDispatcher, Dispatcher>();
             return services;
         }
 

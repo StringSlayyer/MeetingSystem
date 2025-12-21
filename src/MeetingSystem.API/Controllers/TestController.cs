@@ -11,11 +11,11 @@ namespace MeetingSystem.API.Controllers
     public class TestController : ControllerBase
     {
         [HttpPost("multiply")]
-        public async Task<Result<int>> Multiply(int number, [FromServices] ICommandHandler<MultiplyByTwoCommand, int> handler, CancellationToken cancellationToken)
+        public async Task<IActionResult> Multiply(int number, [FromServices] ICommandHandler<MultiplyByTwoCommand, int> handler, CancellationToken cancellationToken)
         {
             var command = new MultiplyByTwoCommand(number);
             Result<int> result = await handler.Handle(command, cancellationToken);
-            return result;
+            return Ok(result);
         }
     }
 }

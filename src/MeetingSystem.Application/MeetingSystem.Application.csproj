@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
     <PackageReference Include="Scrutor" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\MeetingSystem.Contracts\MeetingSystem.Contracts.csproj" />
     <ProjectReference Include="..\MeetingSystem.Domain\MeetingSystem.Domain.csproj" />
     <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
   </ItemGroup>
