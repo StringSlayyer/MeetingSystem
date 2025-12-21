@@ -14,13 +14,13 @@ namespace MeetingSystem.Application
             services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
                 .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
                     .AsImplementedInterfaces()
-                    .WithTransientLifetime()
+                    .WithScopedLifetime()
             .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
                     .AsImplementedInterfaces()
-                    .WithTransientLifetime()
+                    .WithScopedLifetime()
             .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
                     .AsImplementedInterfaces()
-                    .WithTransientLifetime());
+                    .WithScopedLifetime());
 
             services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
                 .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)

@@ -32,9 +32,9 @@ namespace MeetingSystem.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            int result = await base.SaveChangesAsync(cancellationToken);
-
             await PublishDomainEventsAsync();
+
+            int result = await base.SaveChangesAsync(cancellationToken);
 
             return result;
         }
