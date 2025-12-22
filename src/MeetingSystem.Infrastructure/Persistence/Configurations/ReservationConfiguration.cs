@@ -23,11 +23,12 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
                 ts.HasIndex(x => new { x.Start, x.End });
             });
 
-            builder.OwnsOne(r => r.Status, rs =>
-            {
-                rs.Property(x => x.Id).HasColumnName("StatusId");
-                rs.Property(x => x.Name).HasColumnName("StatusName");
-            });
+            builder.Property(r => r.Status)
+            .HasConversion(
+                status => status.Id, // To DB: Save only the Int (e.g., 1)
+                value => ReservationStatus.List().First(s => s.Id == value) // From DB: Find the static instance
+            )
+            .IsRequired();
 
             builder.HasOne<Resource>()
                 .WithMany()

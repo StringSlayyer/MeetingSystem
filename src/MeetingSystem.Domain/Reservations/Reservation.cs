@@ -16,7 +16,7 @@ namespace MeetingSystem.Domain.Reservations
 
         private Reservation() { }
 
-        internal Reservation(Guid resourceId, Guid userId, TimeSlot timeSlot, string? note)
+        public Reservation(Guid resourceId, Guid userId, TimeSlot timeSlot, string? note)
         {
             if (resourceId == Guid.Empty) throw new ArgumentException("Resource is required");
             if (userId == Guid.Empty) throw new ArgumentException("User is required");
@@ -28,6 +28,16 @@ namespace MeetingSystem.Domain.Reservations
             TimeSlot = timeSlot;
             Note = note;
             Status = ReservationStatus.Pending;
+        }
+
+        public void Confirm()
+        {
+            if (!Status.CanTransitionTo(ReservationStatus.Confirmed))
+            {
+                throw new Exception("Cannot confirm this reservation.");
+            }
+
+            Status = ReservationStatus.Confirmed;
         }
     }
 }

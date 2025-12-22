@@ -1,0 +1,53 @@
+﻿using MeetingSystem.Application.Abstractions.Messaging;
+using MeetingSystem.Application.Abstractions.Services;
+using MeetingSystem.Application.Reservations.Create;
+using MeetingSystem.Application.Reservations.GetByResource;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace MeetingSystem.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ReservationController : ControllerBase
+    {
+        private readonly IDispatcher _dispatcher;
+        private readonly ITokenService _tokenService;
+
+        public ReservationController(IDispatcher dispatcher, ITokenService tokenService)
+        {
+            _dispatcher = dispatcher;
+            _tokenService = tokenService;
+        }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateReservationAsync([FromBody] CreateReservationRequest request, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == Guid.Empty) return Unauthorized();
+            var command = new CreateReservationCommand(request.ResourceId, userId, request.StartTime, request.EndTime, request.Note, request.AttendeeEmails);
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
+        }
+
+        [HttpGet("getByResource")]
+        public async Task<IActionResult> GetReservationByResourceAsync([FromQuery] GetReservationByResourceRequest request, CancellationToken cancellationToken)
+        {
+            var query = new GetReservationsByResourceQuery(request.ResourceId, request.Start, request.End);
+            var result = await _dispatcher.Query(query, cancellationToken);
+            return Ok(result);
+        }
+    }
+
+    public sealed record CreateReservationRequest(
+        Guid ResourceId,
+        DateTime StartTime,
+        DateTime EndTime,
+        string? Note,
+        List<string>? AttendeeEmails);
+
+    public sealed record GetReservationByResourceRequest(Guid ResourceId, DateTime? Start, DateTime? End);
+}

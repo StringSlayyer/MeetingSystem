@@ -15,6 +15,7 @@ namespace MeetingSystem.Application.Companies.GetCompanies
         public async Task<Result<List<CompanyDTO>>> Handle(GetCompaniesQuery query, CancellationToken cancellationToken)
         {
             return await context.Companies
+                .AsNoTracking()
                 .Select(c => new CompanyDTO(c.Id, c.ManagerId, c.Name, c.Address.Number, c.Address.Street, c.Address.City, c.Address.State, c.Rooms.Count)).ToListAsync(cancellationToken);
         }
     }

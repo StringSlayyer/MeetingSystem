@@ -16,11 +16,12 @@ namespace MeetingSystem.Domain.Resources
         public DateTime LastBookingUpdate { get; private set;  }
 
         [Timestamp]
-        public byte[] RowVersion { get; private set; }
+        public byte[] RowVersion { get; private set; } = [];
 
         protected Resource() { }
         public Resource(string name, Guid companyId)
         {
+            Id = Guid.NewGuid();
             Name = name;
             CompanyId = companyId;
         }
