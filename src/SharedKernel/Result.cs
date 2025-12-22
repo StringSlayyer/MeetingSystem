@@ -8,7 +8,7 @@ namespace SharedKernel
     public class Result
     {
         public bool IsSuccess { get; }
-        public bool isFailuer => !IsSuccess;
+        public bool isFailure => !IsSuccess;
         public Error? Error { get; set; }
 
         public Result(bool isSuccess, Error error)

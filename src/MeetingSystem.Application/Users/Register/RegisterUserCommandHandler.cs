@@ -12,7 +12,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Users.Register
 {
-    public class RegisterUserCommandHandler(IApplicationDbContext context,
+    public sealed class RegisterUserCommandHandler(IApplicationDbContext context,
         IPasswordHasher passwordHasher, ITokenService tokenService)
         : ICommandHandler<RegisterUserCommand, TokenResponse>
     {

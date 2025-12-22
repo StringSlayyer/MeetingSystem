@@ -1,5 +1,7 @@
 ﻿using MeetingSystem.Application.Abstractions.Messaging;
+using MeetingSystem.Application.Users.Login;
 using MeetingSystem.Application.Users.Register;
+using MeetingSystem.Contracts.Users.Register;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,8 +18,14 @@ namespace MeetingSystem.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterUserCommand command, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken cancellationToken)
         {
+            var command = new RegisterUserCommand(
+                request.Email,
+                request.FirstName,
+                request.LastName,
+                request.Password);
+
             var result = await _dispatcher.Send(command, cancellationToken);
             if(result.IsSuccess)
             {
@@ -26,5 +34,23 @@ namespace MeetingSystem.API.Controllers
             return BadRequest(result.Error);
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginUserRequest request, CancellationToken cancellationToken)
+        {
+            var command = new LoginUserCommand(
+                request.Email,
+                request.Password);
+
+            var result = await _dispatcher.Send(command, cancellationToken);
+            if (result.IsSuccess)
+            {
+                return Ok(result.Data);
+            }
+            return BadRequest(result.Error);
+        }
+
     }
+
+    public sealed record RegisterUserRequest(string Email, string FirstName, string LastName, string Password);
+    public sealed record LoginUserRequest(string Email, string Password);
 }

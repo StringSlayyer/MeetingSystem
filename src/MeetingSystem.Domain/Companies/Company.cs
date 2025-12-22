@@ -16,7 +16,7 @@ namespace MeetingSystem.Domain.Companies
         private readonly List<Resource> _rooms = new();
         public IReadOnlyCollection<Resource> Rooms => _rooms.AsReadOnly();
 
-        public Company() { }
+        private Company() { }
         public Company(Guid managerId, string name, Address address)
         {
             Id = Guid.NewGuid();
