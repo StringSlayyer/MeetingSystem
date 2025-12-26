@@ -30,7 +30,7 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
             )
             .IsRequired();
 
-            builder.HasOne<Resource>()
+            builder.HasOne(r => r.Resource)
                 .WithMany()
                 .HasForeignKey(r => r.ResourceId)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -73,28 +73,16 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-//builder.Services.AddSwaggerGen(options =>
-//{
-//    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-//    {
-//        Name = "Authorization",
-//        In = ParameterLocation.Header,
-//        Type = SecuritySchemeType.Http,
-//        Scheme = "Bearer"
-//    });
-
-//    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-//    {
-//        {
-//            new OpenApiSecurityScheme
-//            {
-
-//            }
-//        }
-//    })
-//})
-
 builder.Services.AddApplication().AddInfrastructure(builder.Configuration);
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("Blazor", policy =>
+    policy.WithOrigins("http://localhost:3005", "http://localhost:5256")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials());
+});
 
 var app = builder.Build();
 

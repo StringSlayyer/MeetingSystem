@@ -212,7 +212,7 @@ namespace MeetingSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("MeetingSystem.Domain.Reservations.Reservation", b =>
                 {
-                    b.HasOne("MeetingSystem.Domain.Resources.Resource", null)
+                    b.HasOne("MeetingSystem.Domain.Resources.Resource", "Resource")
                         .WithMany()
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -246,6 +246,8 @@ namespace MeetingSystem.Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("ReservationId");
                         });
+
+                    b.Navigation("Resource");
 
                     b.Navigation("TimeSlot")
                         .IsRequired();

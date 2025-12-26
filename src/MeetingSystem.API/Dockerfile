@@ -12,13 +12,14 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["MeetingSystem.API/MeetingSystem.API.csproj", "MeetingSystem.API/"]
-COPY ["MeetingSystem.Application/MeetingSystem.Application.csproj", "MeetingSystem.Application/"]
-COPY ["MeetingSystem.Domain/MeetingSystem.Domain.csproj", "MeetingSystem.Domain/"]
-COPY ["MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj", "MeetingSystem.Infrastructure/"]
-COPY ["SharedKernel/SharedKernel.csproj", "SharedKernel/"]
+COPY ["src/MeetingSystem.API/MeetingSystem.API.csproj", "MeetingSystem.API/"]
+COPY ["src/MeetingSystem.Application/MeetingSystem.Application.csproj", "MeetingSystem.Application/"]
+COPY ["src/MeetingSystem.Domain/MeetingSystem.Domain.csproj", "MeetingSystem.Domain/"]
+COPY ["src/MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj", "MeetingSystem.Infrastructure/"]
+COPY ["src/SharedKernel/SharedKernel.csproj", "SharedKernel/"]
+COPY ["src/MeetingSystem.Contracts/MeetingSystem.Contracts.csproj", "MeetingSystem.Contracts/"]
 RUN dotnet restore "./MeetingSystem.API/MeetingSystem.API.csproj"
-COPY . .
+COPY src/ .
 WORKDIR "/src/MeetingSystem.API"
 RUN dotnet build "./MeetingSystem.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

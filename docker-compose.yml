@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: src/MeetingSystem.API/Dockerfile
     environment:
-      - ASPNETCORE_ENVIROMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=meetingsystem.db,1433;Database=MeetingSystemDb;User Id=sa;Password=wfuZbFvsG3@2J#;TrustServerCertificate=True;
       - JWT_ISSUER=localhost
       - JWT_AUDIENCE=localhost
@@ -15,6 +15,16 @@ services:
       - "8081:8081" 
     depends_on:
       - meetingsystem.db
+
+  meetingsystem.client:
+    image: ${DOCKER_REGISTRY-}meetingsystemclient
+    build:
+      context: .
+      dockerfile: src/MeetingSystem.Client/Dockerfile
+    ports:
+      - "3005:80"
+    depends_on:
+      - meetingsystem.api
 
   meetingsystem.db:
     image: mcr.microsoft.com/mssql/server:2022-latest

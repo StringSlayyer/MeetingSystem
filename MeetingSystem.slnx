@@ -1,8 +1,9 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="../MeetingSystem.Contracts/MeetingSystem.Contracts.csproj" Id="9ec431b1-2e91-412b-b896-795a2c114c50" />
     <Project Path="src/MeetingSystem.API/MeetingSystem.API.csproj" />
     <Project Path="src/MeetingSystem.Application/MeetingSystem.Application.csproj" />
+    <Project Path="src/MeetingSystem.Client/MeetingSystem.Client.csproj" Id="956f2e41-34d5-4710-8974-df43e3b66b49" />
+    <Project Path="src/MeetingSystem.Contracts/MeetingSystem.Contracts.csproj" />
     <Project Path="src/MeetingSystem.Domain/MeetingSystem.Domain.csproj" />
     <Project Path="src/MeetingSystem.Infrastructure/MeetingSystem.Infrastructure.csproj" />
     <Project Path="src/SharedKernel/SharedKernel.csproj" />

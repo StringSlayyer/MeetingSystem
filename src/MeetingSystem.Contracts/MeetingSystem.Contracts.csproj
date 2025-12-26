@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MeetingSystem.Contracts\MeetingSystem.Contracts.csproj" />
-    <ProjectReference Include="..\SharedKernel\SharedKernel.csproj" />
+    <Folder Include="Companies\" />
   </ItemGroup>
 
 </Project>

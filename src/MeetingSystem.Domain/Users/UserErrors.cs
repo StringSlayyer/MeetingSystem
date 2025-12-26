@@ -11,5 +11,8 @@ namespace MeetingSystem.Domain.Users
             "Users.EmailNotUnique", "The provided email was not unique");
         public static Error NotFoundByEmail = Error.NotFound(
             "Users.NotFoundByEmail", "No user found with the provided email");
+
+        public static Error UserNotFound(Guid id) => Error.NotFound(
+            "Users.NotFound", $"No user with id {id} was found");
     }
 }

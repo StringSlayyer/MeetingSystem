@@ -1,4 +1,5 @@
-﻿using SharedKernel;
+﻿using MeetingSystem.Domain.Resources;
+using SharedKernel;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ namespace MeetingSystem.Domain.Reservations
     {
         public Guid Id { get; private set; }
         public Guid ResourceId { get; private set; }
+        public Resource Resource { get; private set; } = null!;
         public Guid UserId { get; private set; }
         public TimeSlot TimeSlot { get; private set; }
         public ReservationStatus Status { get; private set; }
