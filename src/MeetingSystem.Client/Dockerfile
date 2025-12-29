@@ -9,6 +9,8 @@ WORKDIR /app
 # Right Side (Container): We remove "src/" to make the container clean.
 COPY ["src/MeetingSystem.Client/MeetingSystem.Client.csproj", "MeetingSystem.Client/"]
 COPY ["src/MeetingSystem.Contracts/MeetingSystem.Contracts.csproj", "MeetingSystem.Contracts/"]
+COPY ["src/SharedKernel/SharedKernel.csproj", "SharedKernel/"]
+
 
 # 2. RESTORE
 # Now we restore using the clean internal paths (no more /src/src nonsense)
@@ -18,6 +20,7 @@ RUN dotnet restore "MeetingSystem.Client/MeetingSystem.Client.csproj"
 # Instead of "COPY . .", we copy only the two folders we actually need.
 COPY ["src/MeetingSystem.Client/", "MeetingSystem.Client/"]
 COPY ["src/MeetingSystem.Contracts/", "MeetingSystem.Contracts/"]
+COPY ["src/SharedKernel/", "SharedKernel/"]
 
 # 4. BUILD
 WORKDIR "/app/MeetingSystem.Client"

@@ -4,6 +4,7 @@ using MeetingSystem.Application.Users.Register;
 using MeetingSystem.Contracts.Users.Register;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static MeetingSystem.Contracts.Users.AuthRequests;
 
 namespace MeetingSystem.API.Controllers
 {
@@ -51,6 +52,4 @@ namespace MeetingSystem.API.Controllers
 
     }
 
-    public sealed record RegisterUserRequest(string Email, string FirstName, string LastName, string Password);
-    public sealed record LoginUserRequest(string Email, string Password);
 }

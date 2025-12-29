@@ -1,0 +1,84 @@
+﻿@page "/login"
+@using MeetingSystem.Client.Auth
+@using MeetingSystem.Client.Abstractions
+@using Microsoft.AspNetCore.Components.Authorization
+@using static MeetingSystem.Contracts.Users.AuthRequests
+
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
+
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+    <RadzenText TextStyle="TextStyle.H3" >Login</RadzenText>
+    <RadzenTemplateForm TItem="LoginInput" Data="@inputModel" Submit="@OnSubmit">
+    
+        <RadzenStack>
+            <RadzenFormField Text="Email">
+                <ChildContent>
+                    <RadzenTextBox Name="Email" @bind-Value="@inputModel.Email" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Email" Text="Email is required"/>
+                </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Password">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="@inputModel.Password" Visible="(passwordVisible)" />
+                    <RadzenPassword Name="Password" @bind-Value="@inputModel.Password" Visible="(!passwordVisible)" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Password" Text="Password is required" />
+                </Helper>
+            </RadzenFormField>
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Login"></RadzenButton>
+        </RadzenStack>
+   </RadzenTemplateForm>
+    
+
+</RadzenCard>
+
+
+@code {
+    public class LoginInput
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    LoginInput inputModel = new();
+    bool passwordVisible = false;
+    bool isBusy = false;
+    string errorMessage = "";
+
+    async Task OnSubmit(LoginInput args)
+    {
+        isBusy = true;
+        errorMessage = "";
+
+        LoginUserRequest request = new(args.Email, args.Password);
+
+        var response = await AuthService.LoginAsync(request);
+
+        await JSRuntime.InvokeVoidAsync("console.log", "Login request: ", request);
+        await JSRuntime.InvokeVoidAsync("console.log", "Login response: ", response);
+
+        if (response.IsSuccess)
+        {
+            var customProvider = (CustomAuthStateProvider)AuthStateProvider;
+
+            await customProvider.MarkUserAsAuthenticated(response.Data.Token);
+
+            Nav.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = response.Error.Description;
+        }
+
+        isBusy = false;
+
+    }
+
+}
