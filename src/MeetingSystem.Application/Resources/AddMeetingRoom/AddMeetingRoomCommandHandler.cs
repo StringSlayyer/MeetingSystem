@@ -1,6 +1,8 @@
 ﻿using MeetingSystem.Application.Abstractions.Data;
 using MeetingSystem.Application.Abstractions.Messaging;
+using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Companies.GetCompanies;
+using MeetingSystem.Contracts.Files;
 using MeetingSystem.Domain.Companies;
 using MeetingSystem.Domain.Resources;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +13,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Resources.AddMeetingRoom
 {
-    public sealed class AddMeetingRoomCommandHandler(IApplicationDbContext context)
+    public sealed class AddMeetingRoomCommandHandler(IApplicationDbContext context, IFileStorageService fileStorageService)
         : ICommandHandler<AddMeetingRoomCommand, Guid>
     {
         public async Task<Result<Guid>> Handle(AddMeetingRoomCommand command, CancellationToken cancellationToken)
@@ -19,9 +21,18 @@ namespace MeetingSystem.Application.Resources.AddMeetingRoom
             var company = await context.Companies.Where(c => c.Id == command.CompanyId).FirstOrDefaultAsync();
             if (company == null) return Result.Failure<Guid>(CompanyError.CompanyNotFound(command.CompanyId));
 
+            
+
             if (company.ManagerId != command.UserId) return Result.Failure<Guid>(ResourceError.UserNotOwner);
 
-            var meetingRoom = new MeetingRoom(command.Name, command.CompanyId, command.Seats);
+            var meetingRoom = new MeetingRoom(command.Name, command.CompanyId, command.Description, command.PricePerHour, null, command.Capacity);
+
+            if (command.Image != null && command.Image.Length > 0)
+            {
+                var imageResponse = await fileStorageService.UploadFile(FileType.RESOURCE_IMAGE, command.Image, command.CompanyId, meetingRoom.Id);
+                meetingRoom.ImageUrl = imageResponse.IsSuccess ? imageResponse.Data : null;
+            }
+
             await context.Resources.AddAsync(meetingRoom, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
             return meetingRoom.Id;

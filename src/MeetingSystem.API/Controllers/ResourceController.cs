@@ -26,7 +26,7 @@ namespace MeetingSystem.API.Controllers
         {
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             if(userId == Guid.Empty) return Unauthorized();
-            var command = new AddMeetingRoomCommand(userId, request.Name, request.CompanyId, request.Seats);
+            var command = new AddMeetingRoomCommand(userId, request.Name, request.CompanyId, request.Description, request.PricePerHour, request.Image, request.Capacity, request.Features);
             var result = await _dispatcher.Send(command, cancellationToken);
 
             if (result.IsSuccess) return Ok(result);
@@ -50,7 +50,8 @@ namespace MeetingSystem.API.Controllers
             return Ok(result);
         }
     }
-    public sealed record AddMeetingRoomRequest(string Name, Guid CompanyId, int Seats);
+    public sealed record AddMeetingRoomRequest(string Name, Guid CompanyId,
+        string Description, decimal PricePerHour, IFormFile? Image, int Capacity, List<string> Features);
     public sealed record GetResourcesByCompanyRequest(Guid CompanyId);
     public sealed record GetResourceByIdRequest(Guid Id);
 }

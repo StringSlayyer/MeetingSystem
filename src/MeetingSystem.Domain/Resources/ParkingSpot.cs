@@ -8,10 +8,11 @@ namespace MeetingSystem.Domain.Resources
     {
         public bool IsCovered { get; private set; }
         public ParkingSpot() { }
-        public ParkingSpot(string name, Guid companyId, bool isCovered)
-            : base(name, companyId)
+        public ParkingSpot(string name, Guid companyId, string description, decimal pricePerHour, string? imageUrl, bool isCovered)
+            : base(name, companyId, description, pricePerHour, imageUrl, 1)
         {
             this.IsCovered = isCovered;
+            this.AddFeature(isCovered ? "Covered Parking" : "Open Parking");
         }
     }
 }

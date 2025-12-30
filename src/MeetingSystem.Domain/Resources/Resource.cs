@@ -10,20 +10,34 @@ namespace MeetingSystem.Domain.Resources
 {
     public abstract class Resource : Entity
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; private set; }
         public Guid CompanyId { get; private set; }
         public string Name { get; private set; }
+        public string Description { get; private set; }
+        public decimal PricePerHour { get; private set; }
+        public string? ImageUrl { get; set; }
+        public int Capacity { get; private set; }
+        public List<string> Features { get; private set; } = new();
         public DateTime LastBookingUpdate { get; private set;  }
 
         [Timestamp]
         public byte[] RowVersion { get; private set; } = [];
 
         protected Resource() { }
-        public Resource(string name, Guid companyId)
+        public Resource(string name, Guid companyId, string description, decimal pricePerHour, string? imageUrl, int capacity)
         {
             Id = Guid.NewGuid();
             Name = name;
             CompanyId = companyId;
+            Description = description;
+            PricePerHour = pricePerHour;
+            ImageUrl = imageUrl;
+            Capacity = capacity;
+        }
+
+        public void AddFeature(string feature)
+        {
+            if (!Features.Contains(feature)) Features.Add(feature);
         }
 
         public void NotifyReservationMade()

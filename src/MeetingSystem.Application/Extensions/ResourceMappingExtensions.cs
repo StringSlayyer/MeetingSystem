@@ -12,7 +12,7 @@ namespace MeetingSystem.Application.Extensions
         {
             return resource switch
             {
-                MeetingRoom room => new MeetingRoomDTO(room.Id, room.CompanyId, room.Name, room.Seats),
+                MeetingRoom room => new MeetingRoomDTO(room.Id, room.CompanyId, room.Name, room.Capacity),
                 ParkingSpot spot => new ParkingSpotDTO(spot.Id, spot.CompanyId, spot.Name, spot.IsCovered),
                 _ => throw new NotImplementedException($"Resource type {resource.GetType().Name} not mapped")
             };

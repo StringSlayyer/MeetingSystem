@@ -10,11 +10,14 @@ services:
       - JWT_ISSUER=localhost
       - JWT_AUDIENCE=localhost
       - JWT_SECRET_KEY=GMAY*XAxuVv3Y5njS4JWJa$n4$EYd!iL$uTxat5hAJ&Ugf3By%tiWmHPKHpCr7f6
+      - FILE_STORAGE_PATH=/app/uploads
     ports:
       - "8080:8080"
       - "8081:8081" 
     depends_on:
       - meetingsystem.db
+    volumes:
+      - meetingsystem_uploads:/app/uploads
 
   meetingsystem.client:
     image: ${DOCKER_REGISTRY-}meetingsystemclient
@@ -40,4 +43,5 @@ services:
 
 volumes:
   mssql_data:
+  meetingsystem_uploads:
 

@@ -25,7 +25,7 @@ namespace MeetingSystem.API.Controllers
         {
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             if (userId == null || userId == Guid.Empty) return Unauthorized();
-            var command = new CreateCompanyCommand(userId, request.Name, request.Number, request.Street, request.City, request.State);
+            var command = new CreateCompanyCommand(userId, request.Name, request.Description, request.Image, request.Number, request.Street, request.City, request.State);
             var result = await _dispatcher.Send(command, cancellationToken);
             return Ok(result);
         }
@@ -41,5 +41,6 @@ namespace MeetingSystem.API.Controllers
 
     }
 
-    public sealed record CreateCompanyRequest(string Name, string Number, string Street, string City, string State);
+    public sealed record CreateCompanyRequest(string Name, string Description,
+        IFormFile? Image, string Number, string Street, string City, string State);
 }
