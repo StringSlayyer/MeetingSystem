@@ -1,0 +1,117 @@
+﻿@page "/register"
+@using MeetingSystem.Client.Auth
+@using MeetingSystem.Client.Abstractions
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using static MeetingSystem.Contracts.Users.AuthRequests
+
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider 
+
+@attribute [AllowAnonymous]
+
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+    <RadzenText TextStyle="TextStyle.H3">Register</RadzenText>
+    <RadzenTemplateForm TItem="RegisterInput" Data="@inputModel" Submit="@OnSubmit">
+
+        <RadzenStack>
+            <RadzenFormField Text="First Name">
+                <ChildContent>
+                    <RadzenTextBox Name="First Name" @bind-Value="@inputModel.FirstName" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="First Name" Text="First Name is required" />
+                </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Last Name">
+                <ChildContent>
+                    <RadzenTextBox Name="Last Name" @bind-Value="@inputModel.LastName" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Last Name" Text="Last Name is required" />
+                </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Email">
+                <ChildContent>
+                    <RadzenTextBox Name="Email" @bind-Value="@inputModel.Email" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Email" Text="Email is required" />
+                </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Password">
+                <ChildContent>
+                    <RadzenPassword Name="Password" @bind-Value="@inputModel.Password" Visible="(!passwordVisible)" />
+                    <RadzenTextBox @bind-Value="@inputModel.Password" Visible="(passwordVisible)" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Password" Text="Password is required" />
+                </Helper>
+            </RadzenFormField>
+            <RadzenFormField Text="Confirm Password">
+                <ChildContent>
+                    <RadzenPassword Name="Confirm Password" @bind-Value="@inputModel.ConfirmPassword" Visible="(!confirmVisible)" />
+                    <RadzenTextBox @bind-Value="@inputModel.Password" Visible="(confirmVisible)" />
+                </ChildContent>
+                <Helper>
+                    <RadzenRequiredValidator Component="Confirm Password" Text="Confirm Password is required" />
+                    <RadzenCompareValidator Value="@inputModel.Password" Component="Confirm Password" Text="Passwords should be the same"/>
+                </Helper>
+            </RadzenFormField>
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Register"></RadzenButton>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     JustifyContent="JustifyContent.Center"
+                     Gap="0.5rem"
+                     class="rz-mt-4">
+            <RadzenText>Already have an account?</RadzenText>
+            <RadzenLink Path="/login" Text="Login" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+
+
+</RadzenCard>
+
+@code {
+    public class RegisterInput
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+
+    RegisterInput inputModel = new();
+    bool passwordVisible = false;
+    bool confirmVisible = false;
+    string errorMessage = "";
+    bool isBusy = false; 
+
+    async Task OnSubmit(RegisterInput args)
+    {
+        isBusy = true;
+        errorMessage = "";
+
+        RegisterUserRequest request = new(args.Email, args.FirstName, args.LastName, args.Password);
+        var response = await AuthService.RegisterAsync(request);
+
+        if (response.IsSuccess)
+        {
+            var customProvider = (CustomAuthStateProvider)AuthStateProvider;
+
+            await customProvider.MarkUserAsAuthenticated(response.Data.Token);
+
+            Nav.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = response.Error.Description;
+        }
+
+        isBusy = false;
+
+    }
+}

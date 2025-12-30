@@ -1,4 +1,5 @@
 ﻿using MeetingSystem.Client.Abstractions;
+using MeetingSystem.Client.Extensions;
 using MeetingSystem.Contracts.Users;
 using MeetingSystem.Contracts.Users.Register;
 using SharedKernel;
@@ -19,7 +20,7 @@ namespace MeetingSystem.Client.Services
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return Result.Failure<TokenResponse>(Error.Failure("Client.Login","Invalid credentials or server error"));
+                    return await response.ToFailureResultAsync<TokenResponse>("Client.Login");
                 }
 
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
@@ -37,9 +38,31 @@ namespace MeetingSystem.Client.Services
             }
         }
 
-        public Task<Result<TokenResponse>> RegisterAsync(RegisterUserRequest request)
+        public async Task<Result<TokenResponse>> RegisterAsync(RegisterUserRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/Auth/register", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<TokenResponse>("Clien.Register");
+                }
+
+                var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+
+                if(tokenResponse == null)
+                {
+                    return Result.Failure<TokenResponse>(Error.Failure("Client.Register", "Server returned empty response"));
+                }
+
+                return tokenResponse;
+            }
+            catch(Exception ex)
+            {
+                return Result.Failure<TokenResponse>(Error.Failure("Client.Register", $"Network error: {ex.Message}"));
+            }
         }
+
     }
 }

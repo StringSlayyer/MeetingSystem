@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @using MeetingSystem.Client.Auth
 @using MeetingSystem.Client.Abstractions
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using static MeetingSystem.Contracts.Users.AuthRequests
 
@@ -9,6 +10,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JSRuntime
 
+@attribute [AllowAnonymous]
 
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
     <RadzenText TextStyle="TextStyle.H3" >Login</RadzenText>
@@ -33,6 +35,13 @@
                 </Helper>
             </RadzenFormField>
             <RadzenButton ButtonType="ButtonType.Submit" Text="Login"></RadzenButton>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal"
+                    JustifyContent="JustifyContent.Center"
+                    Gap="0.5rem"
+                    class="rz-mt-4">
+            <RadzenText>Don't have an account yet?</RadzenText>
+            <RadzenLink Path="/register" Text="Register"/>
         </RadzenStack>
    </RadzenTemplateForm>
     
