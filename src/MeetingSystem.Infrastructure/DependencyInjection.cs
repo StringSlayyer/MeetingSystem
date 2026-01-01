@@ -30,6 +30,7 @@ namespace MeetingSystem.Infrastructure
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IDispatcher, Dispatcher>();
+            services.AddScoped<IFileStorageService, FileStorageService>();
             return services;
         }
 
