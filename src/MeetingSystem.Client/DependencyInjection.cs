@@ -21,6 +21,8 @@ namespace MeetingSystem.Client
             services.AddRadzenComponents();
 
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IDashboardService, DashboardService>();
+
             return services;
         }
     }
