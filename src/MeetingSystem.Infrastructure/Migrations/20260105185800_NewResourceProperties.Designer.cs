@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251230014939_FeaturesColumn")]
-    partial class FeaturesColumn
+    [Migration("20260105185800_NewResourceProperties")]
+    partial class NewResourceProperties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

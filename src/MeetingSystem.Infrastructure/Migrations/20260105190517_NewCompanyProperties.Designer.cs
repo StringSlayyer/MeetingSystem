@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260102230740_NewCompanyResourcesPropertiesV2")]
-    partial class NewCompanyResourcesPropertiesV2
+    [Migration("20260105190517_NewCompanyProperties")]
+    partial class NewCompanyProperties
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

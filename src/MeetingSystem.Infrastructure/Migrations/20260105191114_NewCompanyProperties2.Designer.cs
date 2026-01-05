@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251230014722_NewCompanyResourcesProperties")]
-    partial class NewCompanyResourcesProperties
+    [Migration("20260105191114_NewCompanyProperties2")]
+    partial class NewCompanyProperties2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,7 +105,8 @@ namespace MeetingSystem.Infrastructure.Migrations
 
                     b.Property<string>("Features")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Features");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
