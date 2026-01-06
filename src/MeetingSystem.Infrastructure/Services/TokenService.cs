@@ -1,6 +1,7 @@
 ﻿using MeetingSystem.Application.Abstractions.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SharedKernel;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,9 +13,11 @@ namespace MeetingSystem.Infrastructure.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-        public TokenService(IConfiguration configuration)
+        private readonly IDateTimeProvider _dateTimeProvider;
+        public TokenService(IConfiguration configuration, IDateTimeProvider dateTimeProvider)
         {
             _configuration = configuration;
+            _dateTimeProvider = dateTimeProvider;
         }
         public string GenerateToken(Guid userId)
         {
@@ -30,7 +33,7 @@ namespace MeetingSystem.Infrastructure.Services
                 issuer: _configuration["JWT_ISSUER"],
                 audience: _configuration["JWT_AUDIENCE"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: _dateTimeProvider.UtcNow.AddHours(1),
                 signingCredentials: credentials
             );
 

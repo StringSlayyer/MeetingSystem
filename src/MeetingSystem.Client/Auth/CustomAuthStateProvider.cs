@@ -6,10 +6,9 @@ using System.Text.Json;
 
 namespace MeetingSystem.Client.Auth
 {
-    public class CustomAuthStateProvider(ILocalStorageService localStorage, HttpClient http) : AuthenticationStateProvider
+    public class CustomAuthStateProvider(ILocalStorageService localStorage) : AuthenticationStateProvider
     {
         private readonly ILocalStorageService _localStorage = localStorage;
-        private readonly HttpClient _http = http;
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var token = await _localStorage.GetItemAsync<string>("authToken");
@@ -19,8 +18,13 @@ namespace MeetingSystem.Client.Auth
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())); 
             }
 
+            var claims = ParseClaimsFromJwt(token);
 
-            _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
+            if (IsTokenExpired(claims))
+            {
+                await _localStorage.RemoveItemAsync("authToken");
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
 
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt")));
         }
@@ -60,6 +64,20 @@ namespace MeetingSystem.Client.Auth
                 case 3: base64 += "="; break;
             }
             return Convert.FromBase64String(base64);
+        }
+
+        private bool IsTokenExpired(IEnumerable<Claim> claims)
+        {
+            var expClaim = claims.FirstOrDefault(c => c.Type == "exp");
+
+            if (expClaim == null) return true;
+
+            if(long.TryParse(expClaim.Value, out long expSeconds)){
+                var expDate = DateTimeOffset.FromUnixTimeSeconds(expSeconds);
+                return expDate <= DateTimeOffset.UtcNow;
+            }
+            return false;
+
         }
     }
 }

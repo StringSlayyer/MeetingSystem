@@ -13,7 +13,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Dashboards.Get
 {
-    public sealed class GetUserDashboardQueryHandler(IApplicationDbContext context)
+    public sealed class GetUserDashboardQueryHandler(IApplicationDbContext context, IDateTimeProvider dateTimeProvider)
         : IQueryHandler<GetUserDashboardQuery, UserDashboardDTO>
     {
         public async Task<Result<UserDashboardDTO>> Handle(GetUserDashboardQuery query, CancellationToken cancellationToken)
@@ -21,8 +21,8 @@ namespace MeetingSystem.Application.Dashboards.Get
             var user = await context.Users.Where(u => u.Id == query.UserId).FirstOrDefaultAsync(cancellationToken);
             if (user == null) return Result.Failure<UserDashboardDTO>(UserErrors.UserNotFound(query.UserId));
 
-            DateTime start = DateTime.UtcNow;
-            DateTime end = DateTime.UtcNow.AddDays(7);
+            DateTime start = dateTimeProvider.UtcNow;
+            DateTime end = start.AddDays(7);
 
             var entities = await context.Reservations
                 .AsNoTracking()

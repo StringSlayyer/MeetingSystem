@@ -12,7 +12,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Reservations.GetByCompany
 {
-    public sealed class GetReservationsByCompanyQueryHandler(IApplicationDbContext context)
+    public sealed class GetReservationsByCompanyQueryHandler(IApplicationDbContext context, IDateTimeProvider dateTimeProvider)
         : IQueryHandler<GetReservationsByCompanyQuery, List<ReservationDTO>>
     {
         public async Task<Result<List<ReservationDTO>>> Handle(GetReservationsByCompanyQuery query, CancellationToken cancellationToken)
@@ -21,8 +21,8 @@ namespace MeetingSystem.Application.Reservations.GetByCompany
 
             if (!companyExists) return Result.Failure<List<ReservationDTO>>(CompanyError.CompanyNotFound(query.CompanyId));
 
-            DateTime? filterStart = query.Start ?? DateTime.UtcNow;
-            DateTime? filterEnd = query.End ?? DateTime.UtcNow.AddMonths(1);
+            DateTime? filterStart = query.Start ?? dateTimeProvider.UtcNow;
+            DateTime? filterEnd = query.End ?? dateTimeProvider.UtcNow.AddMonths(1);
 
             if (filterStart > filterEnd) return Result.Failure<List<ReservationDTO>>(ReservationError.WrongDates);
 

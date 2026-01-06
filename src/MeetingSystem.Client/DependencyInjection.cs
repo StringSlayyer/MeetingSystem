@@ -12,7 +12,7 @@ namespace MeetingSystem.Client
         {
             services.AddAuthorizationCore();
             services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-            services.AddScoped<JwtInterceptor>();
+            services.AddTransient<JwtInterceptor>();
             services.AddScoped<ILocalStorageService, LocalStorageService>();
             services.AddHttpClient("API", client =>
                 client.BaseAddress = new Uri("http://localhost:8080"))

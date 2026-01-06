@@ -12,7 +12,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Reservations.GetByUser
 {
-    public sealed class GetReservationsByUserQueryHandler(IApplicationDbContext context)
+    public sealed class GetReservationsByUserQueryHandler(IApplicationDbContext context, IDateTimeProvider dateTimeProvider)
         : IQueryHandler<GetReservationsByUserQuery, List<ReservationDTO>>
     {
         public async Task<Result<List<ReservationDTO>>> Handle(GetReservationsByUserQuery query, CancellationToken cancellationToken)
@@ -20,8 +20,8 @@ namespace MeetingSystem.Application.Reservations.GetByUser
             bool userExists = await context.Users.AnyAsync(u => u.Id == query.UserId);
             if (!userExists) return Result.Failure<List<ReservationDTO>>(UserErrors.UserNotFound(query.UserId));
 
-            DateTime? filterStart = query.Start ?? DateTime.UtcNow;
-            DateTime? filterEnd = query.End ?? DateTime.UtcNow.AddMonths(1);
+            DateTime? filterStart = query.Start ?? dateTimeProvider.UtcNow;
+            DateTime? filterEnd = query.End ?? dateTimeProvider.UtcNow.AddMonths(1);
 
             if (filterStart > filterEnd) return Result.Failure<List<ReservationDTO>>(ReservationError.WrongDates);
 

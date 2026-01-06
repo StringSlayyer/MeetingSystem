@@ -12,7 +12,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Reservations.GetByResource
 {
-    public sealed class GetReservationsByResourceQueryHandler(IApplicationDbContext context)
+    public sealed class GetReservationsByResourceQueryHandler(IApplicationDbContext context, IDateTimeProvider dateTimeProvider)
         : IQueryHandler<GetReservationsByResourceQuery, List<ReservationDTO>>
     {
         public async Task<Result<List<ReservationDTO>>> Handle(GetReservationsByResourceQuery query, CancellationToken cancellationToken)
@@ -21,8 +21,8 @@ namespace MeetingSystem.Application.Reservations.GetByResource
             if (resource == null)
                 return Result.Failure<List<ReservationDTO>>(ResourceError.NotFound(query.ResourceId));
 
-            DateTime? filterStart = query.Start ?? DateTime.UtcNow;
-            DateTime? filterEnd = query.End ?? DateTime.UtcNow.AddMonths(1);
+            DateTime? filterStart = query.Start ?? dateTimeProvider.UtcNow;
+            DateTime? filterEnd = query.End ?? dateTimeProvider.UtcNow.AddMonths(1);
 
             if (filterStart > filterEnd) return Result.Failure<List<ReservationDTO>>(ReservationError.WrongDates);
 

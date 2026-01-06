@@ -1,8 +1,18 @@
 ﻿@page "/"
 @using MeetingSystem.Client.Abstractions
 @using MeetingSystem.Contracts.Dashboard
+@using Microsoft.AspNetCore.Authorization
 
 @inject IDashboardService DashboardService
+@inject IJSRuntime jSRuntime
+@inject NavigationManager Nav
+
+@attribute [Authorize]
+
+@if (!isLoaded)
+{
+    <RadzenText TextStyle="TextStyle.H3">Loading</RadzenText>
+}else{
 
 <RadzenStack class="w-80 m-auto">
 <RadzenText TextStyle="TextStyle.H4">Hello test</RadzenText>
@@ -10,7 +20,7 @@
 </RadzenStack>
 <RadzenRow class="w-100" JustifyContent="JustifyContent.SpaceBetween" RowGap="1rem">
 
-<RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 30% !important; border-radius: 15px; background-color: #FEFCE8;">
+        <RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 30% !important; border-radius: 15px; background-color: #FEFCE8;" onclick="@RedirectToCompanies">
     <RadzenStack class="rz-ml-4">
             <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #FEF9C3">
                 <RadzenIcon Icon="apartment" IconStyle="IconStyle.Dark" />
@@ -42,7 +52,6 @@
 
 </RadzenRow>
 
-
 <RadzenStack>
     <RadzenText TextStyle="TextStyle.H6">Your upcoming reservations</RadzenText>
     <RadzenStack>
@@ -72,6 +81,7 @@
     </RadzenStack>
 </RadzenStack>
 
+}
 <style>
     .rz-card {
         line-height: 0;
@@ -80,13 +90,22 @@
 
 @code {
     private UserDashboardDTO? data;
-
+    bool isLoaded = false;
     protected override async Task OnInitializedAsync()
     {
         var response = await DashboardService.GetUserDashboardAsync();
+
+        await jSRuntime.InvokeVoidAsync("console.log", "Dashboard response: ", response);
+
         if (response.IsSuccess)
         {
             data = response.Data;
+            isLoaded = true;
         }
+    }
+
+    public void RedirectToCompanies()
+    {
+        Nav.NavigateTo("/companies");
     }
 }
