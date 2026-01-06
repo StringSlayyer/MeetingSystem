@@ -1,9 +1,9 @@
 ﻿@page "/login"
 @using MeetingSystem.Client.Auth
 @using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Contracts.Users
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
-@using static MeetingSystem.Contracts.Users.AuthRequests
 
 @inject IAuthService AuthService
 @inject NavigationManager Nav
@@ -35,6 +35,10 @@
                 </Helper>
             </RadzenFormField>
             <RadzenButton ButtonType="ButtonType.Submit" Text="Login"></RadzenButton>
+@if (isError)
+            {
+                <RadzenText>@errorMessage</RadzenText>
+            }
         </RadzenStack>
         <RadzenStack Orientation="Orientation.Horizontal"
                     JustifyContent="JustifyContent.Center"
@@ -59,10 +63,12 @@
     LoginInput inputModel = new();
     bool passwordVisible = false;
     bool isBusy = false;
+    bool isError = false;
     string errorMessage = "";
 
     async Task OnSubmit(LoginInput args)
     {
+        isError = false;
         isBusy = true;
         errorMessage = "";
 
@@ -71,10 +77,14 @@
         var response = await AuthService.LoginAsync(request);
 
         await JSRuntime.InvokeVoidAsync("console.log", "Login request: ", request);
-        await JSRuntime.InvokeVoidAsync("console.log", "Login response: ", response);
+
+
+
 
         if (response.IsSuccess)
         {
+            await JSRuntime.InvokeVoidAsync("console.log", "Login response: ", response);
+
             var customProvider = (CustomAuthStateProvider)AuthStateProvider;
 
             await customProvider.MarkUserAsAuthenticated(response.Data.Token);
@@ -84,6 +94,7 @@
         else
         {
             errorMessage = response.Error.Description;
+            isError = true;
         }
 
         isBusy = false;

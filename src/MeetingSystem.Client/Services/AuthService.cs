@@ -4,7 +4,6 @@ using MeetingSystem.Contracts.Users;
 using MeetingSystem.Contracts.Users.Register;
 using SharedKernel;
 using System.Net.Http.Json;
-using static MeetingSystem.Contracts.Users.AuthRequests;
 
 namespace MeetingSystem.Client.Services
 {

@@ -2,6 +2,7 @@
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Companies.CreateCompany;
 using MeetingSystem.Application.Companies.GetCompanies;
+using MeetingSystem.Contracts.Companies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +22,7 @@ namespace MeetingSystem.API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateCompanyAsync([FromBody] CreateCompanyRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateCompanyAsync([FromForm] CreateCompanyRequest request, CancellationToken cancellationToken)
         {
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             if (userId == null || userId == Guid.Empty) return Unauthorized();
@@ -32,15 +33,17 @@ namespace MeetingSystem.API.Controllers
 
 
         [HttpGet("get")]
-        public async Task<IActionResult> GetCompaniesAsync(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCompaniesAsync([FromQuery] GetCompaniesRequest request, CancellationToken cancellationToken)
         {
-            var companies = await _dispatcher.Query(new GetCompaniesQuery(), cancellationToken);
-            return Ok(companies);
+            var companies = await _dispatcher.Query(new GetCompaniesQuery(request.Page, request.PageSize, request.SearchTerm), cancellationToken);
+
+            if (companies.IsSuccess) return Ok(companies.Data);
+
+            return BadRequest(companies.Error);
 
         }
 
     }
-
     public sealed record CreateCompanyRequest(string Name, string Description,
         IFormFile? Image, string Number, string Street, string City, string State);
 }

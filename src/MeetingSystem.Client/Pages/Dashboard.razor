@@ -14,10 +14,15 @@
     <RadzenText TextStyle="TextStyle.H3">Loading</RadzenText>
 }else{
 
-<RadzenStack class="w-80 m-auto">
+    <RadzenRow JustifyContent="JustifyContent.SpaceBetween" class="w-80 m-auto">
+<RadzenStack >
 <RadzenText TextStyle="TextStyle.H4">Hello test</RadzenText>
 <RadzenText TextStyle="TextStyle.Body1">Welcome back to your reservation hub.</RadzenText>
 </RadzenStack>
+<RadzenStack>
+    <RadzenButton Text="Create Company" Icon="add" Click="@RedirectToCreateCompany" />
+</RadzenStack>
+    </RadzenRow>
 <RadzenRow class="w-100" JustifyContent="JustifyContent.SpaceBetween" RowGap="1rem">
 
         <RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 30% !important; border-radius: 15px; background-color: #FEFCE8;" onclick="@RedirectToCompanies">
@@ -107,5 +112,10 @@
     public void RedirectToCompanies()
     {
         Nav.NavigateTo("/companies");
+    }
+
+    public void RedirectToCreateCompany()
+    {
+        Nav.NavigateTo("/companies/create");
     }
 }

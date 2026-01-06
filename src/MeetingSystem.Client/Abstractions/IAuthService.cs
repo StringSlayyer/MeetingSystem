@@ -1,6 +1,6 @@
 ﻿using MeetingSystem.Contracts.Users.Register;
 using SharedKernel;
-using static MeetingSystem.Contracts.Users.AuthRequests;
+using MeetingSystem.Contracts.Users;
 
 namespace MeetingSystem.Client.Abstractions
 {

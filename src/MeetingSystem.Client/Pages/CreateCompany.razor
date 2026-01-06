@@ -1,0 +1,153 @@
+﻿@page "/companies/create"
+@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Client.Models
+@using Microsoft.AspNetCore.Authorization
+@using System.Net.Http.Headers
+
+@inject ICompanyService CompanyService
+@inject NavigationManager Nav
+@inject NotificationService NotificationService
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
+    <RadzenText TextStyle="TextStyle.H3" Class="rz-mb-6">Create Company</RadzenText>
+
+    <RadzenTemplateForm TItem="CreateCompanyInputModel" Data="@inputModel" Submit="@OnSubmit">
+        <RadzenStack Gap="1rem">
+
+            <RadzenText TextStyle="TextStyle.H6" Class="rz-mt-4">General Information</RadzenText>
+
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Company Name" Style="width: 100%;">
+                        <ChildContent>
+                            <RadzenTextBox Name="Name" @bind-Value="@inputModel.Name" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Name" Text="Company Name is required" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="0.2rem">
+                        <RadzenLabel Text="Image" Component="ImageUpload" style="color: var(--rz-text-tertiary-color); font-size: 0.75rem;" />
+                        <RadzenUpload Name="ImageUpload" Auto="false" Multiple="false" Accept="image/*"
+                                      Change="@OnImageChange"
+                                      Style="width: 100%;" />
+                        @if (selectedFile != null)
+                        {
+                            <RadzenText TextStyle="TextStyle.Caption">Selected: @selectedFile.Name</RadzenText>
+                        }
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenFormField Text="Description" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextArea Name="Description" @bind-Value="@inputModel.Description" Rows="3" />
+                </ChildContent>
+            </RadzenFormField>
+
+            <RadzenText TextStyle="TextStyle.H6" Class="rz-mt-4">Address Details</RadzenText>
+
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="8">
+                    <RadzenFormField Text="Street" Style="width: 100%;">
+                        <ChildContent>
+                            <RadzenTextBox Name="Street" @bind-Value="@inputModel.Street" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Street" Text="Street is required" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenFormField Text="Number" Style="width: 100%;">
+                        <ChildContent>
+                            <RadzenTextBox Name="Number" @bind-Value="@inputModel.Number" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="Number" Text="Number is required" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="City" Style="width: 100%;">
+                        <ChildContent>
+                            <RadzenTextBox Name="City" @bind-Value="@inputModel.City" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="City" Text="City is required" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="State" Style="width: 100%;">
+                        <ChildContent>
+                            <RadzenTextBox Name="State" @bind-Value="@inputModel.State" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="State" Text="State is required" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <RadzenAlert Severity="AlertSeverity.Error" AllowClose="true" Variant="Variant.Flat">
+                    @errorMessage
+                </RadzenAlert>
+            }
+
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Class="rz-mt-4">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Create Company" IsBusy="@isBusy" Icon="save" />
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenCard>
+
+@code { 
+
+    CreateCompanyInputModel inputModel = new();
+    IBrowserFile? selectedFile;
+    bool isBusy = false;
+    string errorMessage = "";
+
+    
+    void OnImageChange(UploadChangeEventArgs args)
+    {
+        if (args.Files.Any())
+        {
+            selectedFile = args.Files.First();
+        }
+        else
+        {
+            selectedFile = null;
+        }
+    }
+
+    
+    async Task OnSubmit(CreateCompanyInputModel args)
+    {
+        isBusy = true;
+        errorMessage = "";
+
+        var response = await CompanyService.CreateCompanyAsync(args, selectedFile);
+
+        if (response.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Company created!");
+            Nav.NavigateTo("/"); 
+        }
+        else
+        {
+            errorMessage = response.Error.Description;
+        }
+
+        isBusy = false;
+    }
+}

@@ -35,7 +35,8 @@ namespace MeetingSystem.API.Middlewares
                 "/swagger/index.html",
                 "/openapi/v1.json"
             ];
-            if (paths.Contains(path.Value))
+            if (paths.Contains(path.Value) ||
+                (path.Value?.StartsWith("/api/files", StringComparison.OrdinalIgnoreCase) ?? false))
             {
                 await _next(context);
                 return;

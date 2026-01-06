@@ -31,6 +31,8 @@ namespace MeetingSystem.Domain.Companies
             Description = description;
             ImageUrl = imageUrl;
             Address = address;
+            Rating = 5.0;
+            BookingCount = 0;
         }
 
         public void AddRoom(Resource resource)

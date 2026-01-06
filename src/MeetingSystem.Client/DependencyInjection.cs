@@ -22,6 +22,7 @@ namespace MeetingSystem.Client
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IDashboardService, DashboardService>();
+            services.AddScoped<ICompanyService, CompanyService>();
 
             return services;
         }

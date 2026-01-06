@@ -1,10 +1,9 @@
 ﻿using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Users.Login;
 using MeetingSystem.Application.Users.Register;
-using MeetingSystem.Contracts.Users.Register;
+using MeetingSystem.Contracts.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static MeetingSystem.Contracts.Users.AuthRequests;
 
 namespace MeetingSystem.API.Controllers
 {
