@@ -2,7 +2,10 @@ body {
     --rz-menu-top-item-color: black;
     --rz-menu-top-item-hover-color: black;
     --rz-menu-top-item-hover-background-color: #f5f5f5;
-    
+    --rz-profile-menu-top-item-hover-background-color: #f5f5f5;
+    --rz-profile-menu-top-item-background-color: #fff;
+    --rz-menu-top-item-selected-color: #353535;
+    --rz-menu-top-item-selected-background-color: #f5f5f5;
 }
 
 html, body {

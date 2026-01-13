@@ -1,13 +1,40 @@
-﻿<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" class="w-75 m-auto">
+﻿@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Client.Auth
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<RadzenRow AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" class="w-75 m-auto">
     <RadzenLink Path="/" Text="Reservation System" class="rz-color-black"/>
     <RadzenMenu class="rz-background-color-white">
-        <RadzenMenuItem Text="Companies" />
-        <RadzenMenuItem Text="Companies" />
+        <AuthorizeView>
+            <Authorized>
+                <RadzenProfileMenu>
+                    <Template>
+                        <RadzenGravatar />
+                    </Template>
+                    <ChildContent>
+                        <RadzenProfileMenuItem Text="Dashboard" Path="/" />
+                        <RadzenProfileMenuItem Text="My Reservations" />
+                        <RadzenProfileMenuItem Text="My Companies" />
+                        <RadzenProfileMenuItem Text="Logout" onclick="@Logout" />
+                    </ChildContent>
+                </RadzenProfileMenu>
+            </Authorized>
+            <NotAuthorized>
+                <RadzenMenuItem Text="Sign up" Path="/register" />
+                <RadzenMenuItem Text="Login" Path="/login" />
+            </NotAuthorized>
+        </AuthorizeView>
+
         
     </RadzenMenu>
 </RadzenRow>
 
 @code {
+
     private bool collapseNavMenu = true;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
@@ -15,5 +42,16 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+     async Task Logout()
+    {
+        Console.WriteLine("Alespon jsem se zapnul");
+        var customProvider = (CustomAuthStateProvider)AuthStateProvider;
+
+        await customProvider.MarkUserAsLoggedOut();
+
+        Nav.NavigateTo("/login");
+
     }
 }
