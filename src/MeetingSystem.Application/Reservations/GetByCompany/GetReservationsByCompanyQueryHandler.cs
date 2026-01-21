@@ -26,7 +26,7 @@ namespace MeetingSystem.Application.Reservations.GetByCompany
 
             if (filterStart > filterEnd) return Result.Failure<List<ReservationDTO>>(ReservationError.WrongDates);
 
-            // 3. The Efficient Query
+           
             var entities = await context.Reservations
                 .AsNoTracking()
                 .Include(r => r.Resource)

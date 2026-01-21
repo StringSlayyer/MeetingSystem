@@ -28,7 +28,7 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
                 address.Property(a => a.Number).HasColumnName("Number").HasMaxLength(20);
             });
 
-            builder.HasOne<User>()
+            builder.HasOne(c => c.Manager)
                 .WithMany()
                 .HasForeignKey(c => c.ManagerId)
                 .OnDelete(DeleteBehavior.Restrict);

@@ -1,0 +1,138 @@
+﻿@page "/companies/{Id}"
+@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Client.Auth
+@using MeetingSystem.Contracts.Companies
+@using Microsoft.AspNetCore.Components.Authorization
+@using MeetingSystem.Client.Extensions
+
+@inject ICompanyService CompanyService
+@inject AuthenticationStateProvider AuthStateProvider 
+@inject NavigationManager Nav
+
+@if (!isLoaded)
+{
+    <RadzenText Text="Loading..." />
+}
+else
+{
+    <RadzenCard Variant="Variant.Outlined" Style="border-radius:16px;">
+        <RadzenCard Variant="Variant.Flat" class="image-container rz-mb-4 rz-mt-0">
+        </RadzenCard>
+        <RadzenStack>
+
+            <RadzenText TextStyle="TextStyle.H5" Text="@data.Name" Style="font-weight: bold;" />
+            
+            <RadzenRow>
+                <RadzenRow>
+                    <RadzenIcon Icon="location_on"/>
+                    <RadzenText>@data.Street @data.Number, @data.City, @data.State</RadzenText>
+                </RadzenRow>
+                <RadzenRow>
+                    <RadzenIcon Icon="star" />
+                    <RadzenText>@data.Rating</RadzenText>
+                </RadzenRow>
+            </RadzenRow>
+            
+            <RadzenText Text="@data.Description" />
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenStack class="rz-mt-12">
+        <RadzenRow JustifyContent="JustifyContent.SpaceBetween">
+            <RadzenText Text="Available Resources" />
+            @if (isOwner)
+            {
+                <RadzenButton Text="Add Resource" Icon="add" Click="@AddResource"/>                    
+            }
+        </RadzenRow>
+        @if (data.Resources.Count > 0)
+        {
+            foreach (var resource in data.Resources)
+            {
+                <RadzenCard @onclick="@(() => OpenResource(resource.Id))">
+                    <RadzenText Text="@resource.Name"  />
+                    <RadzenText Text="@resource.Description" />
+                    <RadzenText>Capacity @resource.Capacity</RadzenText>
+                </RadzenCard>
+            }
+        }
+        else
+        {
+            <RadzenText Text="No available resources" />
+        }
+    </RadzenStack>
+    <style>
+        .image-container {
+            height: 200px;
+            background-image: url( @GetImageUrl(data) );
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+
+    </style>
+
+}
+
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    public bool isLoaded = false;
+    public bool isOwner = false;
+    public string errorMessage = "";
+    private SingleCompanyDTO? data;
+    protected override async Task OnInitializedAsync()
+    {
+        isLoaded = false;
+        var response = await CompanyService.GetCompanyByIdAsync(Id);
+
+
+
+        if (response.IsSuccess)
+        {
+            data = response.Data;
+            Console.WriteLine(data);
+        }
+        else
+        {
+            errorMessage = response.Error.Description;
+            isLoaded = true;
+            return;
+        }
+
+        var customProvider = (CustomAuthStateProvider)AuthStateProvider;
+        var authState = await customProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var currentUserId = user.GetUserId();
+
+            isOwner = (currentUserId == data.Manager.ManagerId);
+        }
+
+        isLoaded = true;
+    }
+
+    string GetRandomColor(string name)
+    {
+        var colors = new[] { "#009688", "#2196f3", "#9c27b0", "#ff5722", "#607d8b" };
+        var index = Math.Abs(name.GetHashCode()) % colors.Length;
+        return colors[index];
+    }
+
+    string GetImageUrl(SingleCompanyDTO c) =>
+      string.IsNullOrEmpty(c.ImageUrl) ? "none" : $"http://localhost:8080/api/files/{c.ImageUrl}";
+
+    public async void AddResource()
+    {
+        Nav.NavigateTo($"/companies/{data.Id}/resources/add");
+    }
+
+    public async void OpenResource(Guid resourceId)
+    {
+        Nav.NavigateTo($"/resources/{resourceId}");
+    }
+}

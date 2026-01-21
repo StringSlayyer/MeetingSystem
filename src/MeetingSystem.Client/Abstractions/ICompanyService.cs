@@ -10,5 +10,7 @@ namespace MeetingSystem.Client.Abstractions
     {
         Task<Result<PagedResult<CompanyDTO>>> GetCompaniesAsync(int page, int pageSize, string? searchTerm = null);
         Task<Result<string>> CreateCompanyAsync(CreateCompanyInputModel model, IBrowserFile? image);
+        Task<Result<SingleCompanyDTO>> GetCompanyByIdAsync(string companyId);
+        Task<Result<PagedResult<CompanyDTO>>> GetCompaniesByUserAsync(int page, int pageSize);
     }
 }

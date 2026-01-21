@@ -1,0 +1,114 @@
+﻿@page "/companies/my"
+
+@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Contracts.Companies
+@inject ICompanyService CompanyService
+@inject NavigationManager Nav
+
+<div style="max-width: 1200px; margin: 0 auto;">
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Class="rz-mb-4">
+
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Class="rz-m-0">Companies</RadzenText>
+        </RadzenStack>
+
+       
+
+    </RadzenStack>
+
+    <RadzenDataList WrapItems="true" AllowPaging="true"
+                    Data="@companies" Count="@totalCount" PageSize="9" LoadData="@LoadData"
+                    TItem="CompanyDTO" PagerPosition="PagerPosition.Bottom">
+        <Template Context="company">
+
+            <RadzenCard Class="company-card rz-shadow-2" Style="width: 350px; margin: 12px; cursor: pointer;"
+                        @onclick="@(() => OpenCompany(company.Id))">
+
+                <div class="card-header-image"
+                     style="background-image: url('@(GetImageUrl(company))'); background-color: @GetRandomColor(company.Name);">
+
+                    <div class="rating-badge">
+                        <span>@company.Rating.ToString("0.0")</span>
+                        <RadzenIcon Icon="star" Style="font-size: 12px; color: black;" />
+                    </div>
+                </div>
+
+                <div class="rz-p-3" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <RadzenText TextStyle="TextStyle.Subtitle1" TagName="TagName.H3" Style="font-weight: bold; margin-bottom: 0.5rem;">
+                            @company.Name
+                        </RadzenText>
+
+                        <RadzenText TextStyle="TextStyle.Body2" Class="rz-text-secondary" Style="height: 40px; overflow: hidden; text-overflow: ellipsis;">
+                            @company.Description
+                        </RadzenText>
+                    </div>
+
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Class="rz-mt-3">
+
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="4px" AlignItems="AlignItems.Center">
+                            <RadzenIcon Icon="location_on" Style="font-size: 16px; color: #9ca3af;" />
+                            <RadzenText TextStyle="TextStyle.Caption" Class="rz-text-tertiary-color rz-m-0">
+                                @company.City, @company.State
+                            </RadzenText>
+                        </RadzenStack>
+
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="4px" AlignItems="AlignItems.Center">
+                            <RadzenIcon Icon="people" Style="font-size: 16px; color: #9ca3af;" />
+                            <RadzenText TextStyle="TextStyle.Caption" Class="rz-text-tertiary-color rz-m-0">
+                                @company.BookingCount bookings
+                            </RadzenText>
+                        </RadzenStack>
+
+                    </RadzenStack>
+                </div>
+
+            </RadzenCard>
+
+        </Template>
+    </RadzenDataList>
+</div>
+
+@code {
+    List<CompanyDTO> companies;
+    int totalCount;
+    string sortBy = "Most Booked";
+
+    string GetImageUrl(CompanyDTO c) =>
+        string.IsNullOrEmpty(c.ImageUrl) ? "none" : $"http://localhost:8080/api/files/{c.ImageUrl}";
+
+    string GetRandomColor(string name)
+    {
+        var colors = new[] { "#009688", "#2196f3", "#9c27b0", "#ff5722", "#607d8b" };
+        var index = Math.Abs(name.GetHashCode()) % colors.Length;
+        return colors[index];
+    }
+
+    async Task LoadData(LoadDataArgs args)
+    {
+        int pageNumber = (args.Skip ?? 0) / (args.Top ?? 9) + 1;
+        int pageSize = args.Top ?? 9;
+
+        
+        var result = await CompanyService.GetCompaniesByUserAsync(pageNumber, pageSize);
+
+        if (result.IsSuccess)
+        {
+            companies = result.Data.Items;
+            totalCount = result.Data.TotalCount;
+        }
+    }
+
+    async Task OnSearch()
+    {
+        
+        await LoadData(new LoadDataArgs { Top = 9, Skip = 0 });
+    }
+    async Task OnSort() { await LoadData(new LoadDataArgs { Top = 9, Skip = 0 }); }
+
+    void OpenCompany(Guid id)
+    {
+        Nav.NavigateTo($"/companies/my/{id}");
+    }
+}

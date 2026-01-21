@@ -1,0 +1,197 @@
+﻿@page "/resources/{Id}"
+@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Client.Auth
+@using MeetingSystem.Client.Extensions
+@using MeetingSystem.Contracts.Reservations
+@using MeetingSystem.Contracts.Resources
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject IResourceService ResourceService
+@inject IReservationService ReservationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
+
+@if (resource == null && isLoading)
+{
+    <RadzenProgressBar Value="100" Mode="ProgressBarMode.Indeterminate" />
+}
+else
+{
+    <RadzenCard Variant="Variant.Outlined" Class="rz-mb-4" Style="border-radius:16px;">
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenImage Path="@GetImageUrl(resource)" Style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;" />
+            </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="9">
+                <RadzenStack>
+                    <RadzenRow JustifyContent="JustifyContent.SpaceBetween">
+                        <RadzenText TextStyle="TextStyle.H4" Style="margin: 0;">@resource.Name</RadzenText>
+                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@($"{resource.PricePerHour:C} / hr")" Style="font-size: 1.2rem; padding: 0.5rem;" />
+                    </RadzenRow>
+
+                    <RadzenText TextStyle="TextStyle.Body1">@resource.Description</RadzenText>
+
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem">
+                        <RadzenIcon Icon="people" />
+                        <RadzenText TextStyle="TextStyle.Body2">Capacity: @resource.Capacity</RadzenText>
+
+                        @if (resource is MeetingRoomDTO room)
+                        {
+                            <RadzenIcon Icon="meeting_room" />
+                            <RadzenText TextStyle="TextStyle.Body2">Meeting Room</RadzenText>
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Class="rz-mt-2" Wrap="FlexWrap.Wrap">
+                                @foreach (var feature in resource.Features)
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Light" IsPill="true" Class="rz-p-2" Style="cursor: pointer;">
+                                        @feature
+                                    </RadzenBadge>
+                                }
+                            </RadzenStack>
+                        }
+                        else if (resource is ParkingSpotDTO spot)
+                        {
+                            <RadzenIcon Icon="local_parking" />
+                            <RadzenText TextStyle="TextStyle.Body2">@(spot.IsCovered ? "Covered Spot" : "Open Spot")</RadzenText>
+                        }
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenCard>
+
+    <RadzenCard>
+        <RadzenText TextStyle="TextStyle.H5" Class="rz-mb-4">Availability</RadzenText>
+
+        <RadzenScheduler @ref=@scheduler
+                         SlotRender="@OnSlotRender"
+                         Style="height: 768px;"
+                         TItem="ReservationDTO"
+                         Data="@reservations"
+                         StartProperty="Start"
+                         EndProperty="End"
+                         TextProperty="Status"
+                         LoadData="@OnLoadData"
+                         SlotSelect="@OnSlotSelect"
+                         AppointmentSelect="@OnAppointmentSelect"
+                         AppointmentRender="@OnAppointmentRender">
+
+            <RadzenDayView />
+            <RadzenWeekView />
+            <RadzenMonthView />
+        </RadzenScheduler>
+    </RadzenCard>
+}
+
+@code {
+    [Parameter] public string Id { get; set; }
+
+    bool isLoading = true;
+    RadzenScheduler<ReservationDTO> scheduler;
+    ResourceDTO? resource;
+    IList<ReservationDTO> reservations = new List<ReservationDTO>();
+    Guid UserId = Guid.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        if (Guid.TryParse(Id, out var resourceId))
+        {
+            Console.WriteLine($"Parsed guid {resourceId}");
+            var result = await ResourceService.GetResourceByIdAsync(new(resourceId));
+            await JSRuntime.InvokeVoidAsync("console.log", "Result error from request ", result.Error);
+            await JSRuntime.InvokeVoidAsync("console.log", "Result data from request ", result.Data);
+            await JSRuntime.InvokeVoidAsync("console.log", "Result from request ", result);
+            Console.WriteLine(result.Error);
+            Console.WriteLine(result.Data);
+            Console.WriteLine(result);
+
+            if (result.IsSuccess)
+            {
+                Console.WriteLine(result);
+                resource = result.Data;
+            }
+            else
+            {
+                Console.WriteLine(result.Error);
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Resource not found");
+            }
+        }
+
+        var customProvider = (CustomAuthStateProvider)AuthStateProvider;
+        var authState = await customProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            UserId = user.GetUserId();
+
+        }
+        isLoading = false;
+    }
+
+    async Task OnLoadData(SchedulerLoadDataEventArgs args)
+    {
+        if (Guid.TryParse(Id, out var resourceId))
+        {
+            var result = await ReservationService.GetReservationsByResourceAsync(new(resourceId, args.Start, args.End));
+            await JSRuntime.InvokeVoidAsync("console.log", "Result error from request ", result.Error);
+            await JSRuntime.InvokeVoidAsync("console.log", "Result data from request ", result.Data);
+            await JSRuntime.InvokeVoidAsync("console.log", "Result from request ", result);
+            if (result.IsSuccess)
+            {
+                reservations = result.Data;
+            }
+        }
+    }
+
+    async Task OnSlotSelect(SchedulerSlotSelectEventArgs args)
+    {
+        if (args.Start < DateTime.Now)
+        {
+            NotificationService.Notify(NotificationSeverity.Warning, "Cannot book past dates");
+            return;
+        }
+
+        var data = await DialogService.OpenAsync<AddReservationDialog>("New Reservation",
+            new Dictionary<string, object> { { "Start", args.Start }, { "End", args.End }, { "ResourceId", resource.Id } });
+
+        if (data == true)
+        {
+            await scheduler.Reload(); 
+        }
+    }
+
+    async Task OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<ReservationDTO> args)
+    {
+        await DialogService.OpenAsync<ReservationDetailDialog>("Reservation Details",
+             new Dictionary<string, object> { { "Reservation", args.Data } });
+    }
+
+    void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<ReservationDTO> args)
+    {
+        if (args.Data.Status == "Cancelled")
+        {
+            args.Attributes["style"] = "background: red";
+        }
+        else if (args.Data.UserId == UserId) 
+        {
+            args.Attributes["style"] = "background: #009688"; 
+        }
+
+        args.Attributes["draggable"] = "false";
+    }
+
+    void OnSlotRender(SchedulerSlotRenderEventArgs args)
+    {
+        if (args.View.Text == "Month" && args.Start.Date == DateTime.Today)
+        {
+            args.Attributes["style"] = "background: rgba(255,220,40,0.2);";
+        }
+    }
+
+    string GetImageUrl(ResourceDTO r) =>
+      string.IsNullOrEmpty(r.ImageUrl) ? "none" : $"http://localhost:8080/api/files/{r.ImageUrl}";
+}

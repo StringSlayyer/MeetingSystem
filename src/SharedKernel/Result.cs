@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace SharedKernel
 {
@@ -31,11 +32,13 @@ namespace SharedKernel
     {
         private readonly T? _data;
 
-        public Result(T? data, bool isSuccess, Error error)
-            : base(isSuccess, error)
+        [JsonConstructor]
+        public Result(T? data, bool isSuccess, Error? error)
+        : base(isSuccess, isSuccess ? Error.None : (error ?? Error.Failure("DeserializationError", "Error was null")))
         {
             _data = data;
         }
+
 
         [NotNull]
         public T Data => IsSuccess

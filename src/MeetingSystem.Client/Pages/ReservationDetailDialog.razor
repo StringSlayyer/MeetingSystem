@@ -1,0 +1,90 @@
+﻿@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Contracts.Reservations
+
+@inject IReservationService ReservationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenStack Gap="1rem">
+    
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+        <RadzenText TextStyle="TextStyle.Subtitle2" Class="rz-m-0">Status</RadzenText>
+        <RadzenBadge BadgeStyle="@GetStatusColor(Reservation.Status)" Text="@Reservation.Status" />
+    </RadzenStack>
+
+    <RadzenHr />
+
+    <RadzenRow>
+        <RadzenColumn Size="6">
+            <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-gray-dark">Start</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">@Reservation.Start.ToString("g")</RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="6">
+            <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-gray-dark">End</RadzenText>
+            <RadzenText TextStyle="TextStyle.Body1">@Reservation.End.ToString("g")</RadzenText>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @if (!string.IsNullOrEmpty(Reservation.Note))
+    {
+        <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-gray-dark" Style="margin-top: 10px;">Note</RadzenText>
+        <RadzenCard Variant="Variant.Flat" Class="rz-background-color-info-lighter rz-p-2">
+            <RadzenText TextStyle="TextStyle.Body2" Style="font-style: italic;">"@Reservation.Note"</RadzenText>
+        </RadzenCard>
+    }
+
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem" Class="rz-mt-4">
+        <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Light" Click="@(() => DialogService.Close(false))" />
+
+        @if (Reservation.Status != "Cancelled")
+        {
+            <RadzenButton Text="Cancel Reservation" 
+                          ButtonStyle="ButtonStyle.Danger" 
+                          Variant="Variant.Flat" 
+                          Icon="cancel" 
+                          Click="@OnCancel" 
+                          IsBusy="@isBusy" />
+        }
+    </RadzenStack>
+
+</RadzenStack>
+
+@code {
+    [Parameter] public ReservationDTO Reservation { get; set; } = default!;
+
+    bool isBusy = false;
+
+    BadgeStyle GetStatusColor(string status) => status switch
+    {
+        "Confirmed" => BadgeStyle.Success,
+        "Cancelled" => BadgeStyle.Danger,
+        "Pending" => BadgeStyle.Warning,
+        _ => BadgeStyle.Light
+    };
+
+    async Task OnCancel()
+    {
+        var confirm = await DialogService.Confirm("Are you sure you want to cancel this reservation?", "Cancel Reservation", 
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+     /*   if (confirm == true)
+        {
+            isBusy = true;
+            
+            // Assuming you have a cancel method
+            //var result = await ReservationService.CancelReservationAsync(Reservation.Id);
+
+            isBusy = false;
+
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Cancelled", "Reservation has been cancelled.");
+                DialogService.Close(true); // Return true to refresh parent
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
+            }
+        }*/
+    }
+}

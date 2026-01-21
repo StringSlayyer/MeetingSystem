@@ -18,8 +18,8 @@
                     <ChildContent>
                         <RadzenProfileMenuItem Text="Dashboard" Path="/" />
                         <RadzenProfileMenuItem Text="My Reservations" />
-                        <RadzenProfileMenuItem Text="My Companies" />
-                        <RadzenProfileMenuItem Text="Logout" onclick="@Logout" />
+                        <RadzenProfileMenuItem Text="My Companies" Path="/companies/my" />
+                        <RadzenMenuItem Text="Logout" Click="@Logout"/>
                     </ChildContent>
                 </RadzenProfileMenu>
             </Authorized>
@@ -44,7 +44,7 @@
         collapseNavMenu = !collapseNavMenu;
     }
 
-     async Task Logout()
+    async Task Logout()
     {
         Console.WriteLine("Alespon jsem se zapnul");
         var customProvider = (CustomAuthStateProvider)AuthStateProvider;

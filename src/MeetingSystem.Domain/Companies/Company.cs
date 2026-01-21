@@ -1,4 +1,5 @@
 ﻿using MeetingSystem.Domain.Resources;
+using MeetingSystem.Domain.Users;
 using SharedKernel;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace MeetingSystem.Domain.Companies
         public string? ImageUrl { get; set; }
 
         public Guid ManagerId { get; private set; }
+        public User Manager { get; private set; }
         public Address Address { get; private set; }
 
         public double Rating { get; private set; }

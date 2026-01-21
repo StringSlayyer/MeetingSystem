@@ -2,6 +2,7 @@
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Reservations.Create;
 using MeetingSystem.Application.Reservations.GetByResource;
+using MeetingSystem.Contracts.Reservations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,16 +39,13 @@ namespace MeetingSystem.API.Controllers
         {
             var query = new GetReservationsByResourceQuery(request.ResourceId, request.Start, request.End);
             var result = await _dispatcher.Query(query, cancellationToken);
-            return Ok(result);
+
+            if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
         }
     }
 
-    public sealed record CreateReservationRequest(
-        Guid ResourceId,
-        DateTime StartTime,
-        DateTime EndTime,
-        string? Note,
-        List<string>? AttendeeEmails);
+  
 
-    public sealed record GetReservationByResourceRequest(Guid ResourceId, DateTime? Start, DateTime? End);
 }

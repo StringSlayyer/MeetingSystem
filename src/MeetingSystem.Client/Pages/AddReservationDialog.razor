@@ -1,0 +1,89 @@
+﻿@using MeetingSystem.Contracts.Reservations
+@using MeetingSystem.Client.Abstractions
+
+@inject IReservationService ReservationService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenTemplateForm TItem="CreateReservationInput" Data="@inputModel" Submit="@OnSubmit">
+    <RadzenStack Gap="1.5rem">
+
+        <RadzenRow>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="Start Time" Style="width: 100%;">
+                    <RadzenDatePicker @bind-Value="@inputModel.Start" ShowTime="true" HourFormat="24" Name="Start" />
+                    <RadzenRequiredValidator Component="Start" Text="Start time is required" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="6">
+                <RadzenFormField Text="End Time" Style="width: 100%;">
+                    <RadzenDatePicker @bind-Value="@inputModel.End" ShowTime="true" HourFormat="24" Name="End" />
+                    <RadzenRequiredValidator Component="End" Text="End time is required" />
+                    <RadzenCompareValidator Component="End" Value="@inputModel.Start" Operator="CompareOperator.GreaterThan" Text="End must be after Start" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenAlert Severity="AlertSeverity.Info" Variant="Variant.Flat" Shade="Shade.Lighter">
+            Duration: @((inputModel.End - inputModel.Start).TotalHours.ToString("0.##")) hours
+        </RadzenAlert>
+
+        <RadzenFormField Text="Note (Optional)" Style="width: 100%;">
+            <RadzenTextArea @bind-Value="@inputModel.Note" Rows="3" MaxLength="500" />
+        </RadzenFormField>
+
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem">
+            <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="@(() => DialogService.Close(false))" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Confirm Booking" Icon="check_circle" IsBusy="@isBusy" />
+        </RadzenStack>
+
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter] public Guid ResourceId { get; set; }
+    [Parameter] public DateTime Start { get; set; }
+    [Parameter] public DateTime End { get; set; }
+
+    bool isBusy = false;
+    CreateReservationInput inputModel = new();
+
+    protected override void OnInitialized()
+    {
+        inputModel.Start = Start;
+        inputModel.End = End;
+    }
+
+    async Task OnSubmit()
+    {
+        isBusy = true;
+
+        CreateReservationRequest request = new(
+            ResourceId,
+            inputModel.Start,
+            inputModel.End,
+            inputModel.Note,
+            null
+        );
+        var result = await ReservationService.CreateReservationAsync(request);
+
+        isBusy = false;
+
+        if (result.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Reservation created!");
+            DialogService.Close(true);
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
+        }
+    }
+
+    public class CreateReservationInput
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+        public string? Note { get; set; }
+    }
+}

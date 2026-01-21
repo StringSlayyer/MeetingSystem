@@ -8,7 +8,7 @@ namespace MeetingSystem.Application.Extensions
 {
     public static class ReservationMappingExtensions
     {
-        public static ReservationDTO ToDTO(this Reservation reservation, string resourceName)
+        public static ReservationDTO ToDTO(this Reservation reservation, string? resourceName)
         {
             return new ReservationDTO(
                 reservation.Id,

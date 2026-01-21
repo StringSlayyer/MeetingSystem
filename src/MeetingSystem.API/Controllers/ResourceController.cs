@@ -3,6 +3,7 @@ using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Resources.AddMeetingRoom;
 using MeetingSystem.Application.Resources.GetByCompany;
 using MeetingSystem.Application.Resources.GetById;
+using MeetingSystem.Contracts.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ namespace MeetingSystem.API.Controllers
         }
 
         [HttpPost("addMeetingRoom")]
-        public async Task<IActionResult> AddMeetingRoomAsync([FromBody] AddMeetingRoomRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> AddMeetingRoomAsync([FromForm] AddMeetingRoomRequest request, CancellationToken cancellationToken)
         {
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             if(userId == Guid.Empty) return Unauthorized();
@@ -39,7 +40,9 @@ namespace MeetingSystem.API.Controllers
         {
             var query = new GetResourcesByCompanyQuery(request.CompanyId);
             var result = await _dispatcher.Query(query, cancellationToken);
-            return Ok(result);
+            if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
         }
 
         [HttpGet("getById")]
@@ -47,11 +50,12 @@ namespace MeetingSystem.API.Controllers
         {
             var query = new GetResourceByIdQuery(request.Id);
             var result = await _dispatcher.Query(query, cancellationToken);
-            return Ok(result);
+            if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
         }
     }
     public sealed record AddMeetingRoomRequest(string Name, Guid CompanyId,
         string Description, decimal PricePerHour, IFormFile? Image, int Capacity, List<string> Features);
-    public sealed record GetResourcesByCompanyRequest(Guid CompanyId);
-    public sealed record GetResourceByIdRequest(Guid Id);
+    
 }

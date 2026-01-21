@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using SharedKernel;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 
 namespace MeetingSystem.Client.Services
 {
@@ -81,6 +82,55 @@ namespace MeetingSystem.Client.Services
             catch (Exception ex)
             {
                 return Result.Failure<PagedResult<CompanyDTO>>(Error.Failure("Network", ex.Message));
+            }
+        }
+
+        public async Task<Result<PagedResult<CompanyDTO>>> GetCompaniesByUserAsync(int page, int pageSize)
+        {
+            try
+            {
+                var url = $"api/Company/getByUser?page={page}&pageSize={pageSize}";
+
+                var response = await _http.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<PagedResult<CompanyDTO>>("Client.Companies.GetByUser");
+                }
+
+                var pagedResult = await response.Content.ReadFromJsonAsync<PagedResult<CompanyDTO>>();
+
+                return pagedResult ?? new PagedResult<CompanyDTO>();
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<PagedResult<CompanyDTO>>(Error.Failure("Network", ex.Message));
+            }
+        }
+
+        public async Task<Result<SingleCompanyDTO>> GetCompanyByIdAsync(string companyId)
+        {
+            try
+            {
+                var queryString = new StringBuilder();
+                queryString.Append("?CompanyId=").Append(companyId);
+
+                var url = "/api/Company/getById" + queryString;
+
+                var response = await _http.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<SingleCompanyDTO>("Client.Companies.GetById");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<SingleCompanyDTO>();
+
+                return result;
+
+            }catch(Exception ex)
+            {
+                return Result.Failure<SingleCompanyDTO>(Error.Failure("Client.Companies.GetById", $"Network error: {ex.Message}"));
             }
         }
     }

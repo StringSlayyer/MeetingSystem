@@ -17,8 +17,8 @@ namespace MeetingSystem.Application.Reservations.GetByResource
     {
         public async Task<Result<List<ReservationDTO>>> Handle(GetReservationsByResourceQuery query, CancellationToken cancellationToken)
         {
-            var resource = await context.Resources.Where(r => r.Id == query.ResourceId).FirstOrDefaultAsync(cancellationToken);
-            if (resource == null)
+            var resourceExists = await context.Resources.AnyAsync(r => r.Id == query.ResourceId, cancellationToken);
+            if (!resourceExists)
                 return Result.Failure<List<ReservationDTO>>(ResourceError.NotFound(query.ResourceId));
 
             DateTime? filterStart = query.Start ?? dateTimeProvider.UtcNow;
@@ -36,7 +36,8 @@ namespace MeetingSystem.Application.Reservations.GetByResource
                 .OrderBy(r => r.TimeSlot.Start)
                 .ToListAsync(cancellationToken);
 
-            var dtos = entities.Select(r => r.ToDTO(resource.Name));
+            if (entities.Count == 0) return new List<ReservationDTO>();
+            var dtos = entities.Select(r => r.ToDTO(null));
 
             return dtos.ToList();
         }
