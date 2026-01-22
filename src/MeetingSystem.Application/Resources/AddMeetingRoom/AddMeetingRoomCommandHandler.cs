@@ -27,13 +27,18 @@ namespace MeetingSystem.Application.Resources.AddMeetingRoom
 
             var meetingRoom = new MeetingRoom(command.Name, command.CompanyId, command.Description, command.PricePerHour, null, command.Capacity);
 
+            if(command.Features.Count > 0)
+            {
+                foreach (string feature in command.Features) meetingRoom.AddFeature(feature);
+            }
+
             if (command.Image != null && command.Image.Length > 0)
             {
                 var imageResponse = await fileStorageService.UploadFile(FileType.RESOURCE_IMAGE, command.Image, command.CompanyId, meetingRoom.Id);
                 meetingRoom.ImageUrl = imageResponse.IsSuccess ? imageResponse.Data : null;
             }
 
-            await context.Resources.AddAsync(meetingRoom, cancellationToken);
+            company.AddRoom(meetingRoom);
             await context.SaveChangesAsync(cancellationToken);
             return meetingRoom.Id;
         }

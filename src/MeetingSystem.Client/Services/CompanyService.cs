@@ -133,5 +133,46 @@ namespace MeetingSystem.Client.Services
                 return Result.Failure<SingleCompanyDTO>(Error.Failure("Client.Companies.GetById", $"Network error: {ex.Message}"));
             }
         }
+
+        public async Task<Result<string>> UpdateCompanyAsync(Guid companyId, CreateCompanyInputModel model, IBrowserFile? image)
+        {
+            try
+            {
+                using var content = new MultipartFormDataContent();
+
+                void AddString(string value, string name) =>
+                    content.Add(new StringContent(value ?? string.Empty), name);
+
+                AddString(companyId.ToString(), "CompanyId");
+
+                AddString(model.Name, "Name");
+                AddString(model.Description, "Description");
+                AddString(model.Number, "Number");
+                AddString(model.Street, "Street");
+                AddString(model.City, "City");
+                AddString(model.State, "State");
+
+                if (image is not null)
+                {
+                    var maxFileSize = 5 * 1024 * 1024;
+                    var fileContent = new StreamContent(image.OpenReadStream(maxFileSize));
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(image.ContentType);
+                    content.Add(fileContent, "Image", image.Name);
+                }
+
+                var response = await _http.PutAsync("api/Company/edit", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<string>("Client.Companies.Update");
+                }
+
+                return Result.Success("Company updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<string>(Error.Failure("Client.Companies.Update", $"Network error: {ex.Message}"));
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Messaging;
+﻿using MeetingSystem.Application.Abstractions.Behaviors;
+using MeetingSystem.Application.Abstractions.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
 using System;
@@ -26,6 +27,10 @@ namespace MeetingSystem.Application
                 .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
                    .AsImplementedInterfaces()
                    .WithScopedLifetime());
+
+            services.TryDecorate(typeof(ICommandHandler<>), typeof(ExceptionHandlingDecorator.CommandHandler<>));
+            services.TryDecorate(typeof(ICommandHandler<,>), typeof(ExceptionHandlingDecorator.CommandHandler<,>));
+            services.TryDecorate(typeof(IQueryHandler<,>), typeof(ExceptionHandlingDecorator.QueryHandler<,>));
 
             return services;
         }

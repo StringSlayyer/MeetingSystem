@@ -15,6 +15,12 @@
 }
 else
 {
+    @if (isOwner)
+    {
+        <RadzenStack>
+            <RadzenButton Text="Edit Company" Icon="edit" Click="@EditCompany"/>
+        </RadzenStack>
+    }
     <RadzenCard Variant="Variant.Outlined" Style="border-radius:16px;">
         <RadzenCard Variant="Variant.Flat" class="image-container rz-mb-4 rz-mt-0">
         </RadzenCard>
@@ -134,5 +140,10 @@ else
     public async void OpenResource(Guid resourceId)
     {
         Nav.NavigateTo($"/resources/{resourceId}");
+    }
+
+    public async void EditCompany()
+    {
+        Nav.NavigateTo($"/companies/{data.Id}/edit");
     }
 }

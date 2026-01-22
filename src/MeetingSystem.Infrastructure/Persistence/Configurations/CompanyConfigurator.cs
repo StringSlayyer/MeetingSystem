@@ -37,6 +37,9 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
                 .WithOne()
                 .HasForeignKey(r => r.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Navigation(c => c.Rooms)
+               .UsePropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

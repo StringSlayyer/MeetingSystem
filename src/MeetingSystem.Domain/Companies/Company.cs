@@ -39,9 +39,36 @@ namespace MeetingSystem.Domain.Companies
 
         public void AddRoom(Resource resource)
         {
+            bool exists = _rooms.Any(r => r.Name.Equals(resource.Name, StringComparison.InvariantCultureIgnoreCase));
+
+            if (exists)
+            {
+                throw new DomainException("Company.DuplicateRoom", $"A room with the name '{resource.Name}' already exists in this company.");
+            }
+
+            if (_rooms.Count >= 20)
+            {
+                throw new DomainException("Company.MaxRoomsReached", "This company cannot have more than 20 rooms.");
+            }
+
+            if (resource.CompanyId != this.Id)
+            {
+                throw new DomainException("Company.InvalidResource", "Cannot add a resource linked to a different company.");
+            }
+
             _rooms.Add(resource);
         }
 
+        public void UpdateDetails(string name, string description, Address address, string? imageUrl)
+        {
+            Name = name;
+            Description = description;
+            Address = address;
 
+            if(imageUrl is not null)
+            {
+                ImageUrl = imageUrl;
+            }
+        }
     }
 }

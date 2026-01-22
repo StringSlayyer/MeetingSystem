@@ -25,8 +25,8 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
 
             builder.Property(r => r.Status)
             .HasConversion(
-                status => status.Id, // To DB: Save only the Int (e.g., 1)
-                value => ReservationStatus.List().First(s => s.Id == value) // From DB: Find the static instance
+                status => status.Id, 
+                value => ReservationStatus.List().First(s => s.Id == value) 
             )
             .IsRequired();
 

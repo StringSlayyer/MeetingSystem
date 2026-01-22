@@ -4,6 +4,7 @@ using MeetingSystem.Application.Companies.CreateCompany;
 using MeetingSystem.Application.Companies.GetById;
 using MeetingSystem.Application.Companies.GetByUser;
 using MeetingSystem.Application.Companies.GetCompanies;
+using MeetingSystem.Application.Companies.Update;
 using MeetingSystem.Contracts.Companies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -67,7 +68,43 @@ namespace MeetingSystem.API.Controllers
 
             return BadRequest(companies.Error);
         }
+
+        [HttpPut("edit")]
+        public async Task<IActionResult> UpdateCompanyAsync([FromForm] UpdateCompanyRequest request, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == null || userId == Guid.Empty) return Unauthorized();
+
+            var command = new UpdateCompanyCommand(
+                request.CompanyId,
+                userId,
+                request.Name,
+                request.Description,
+                request.Image,
+                request.Number,
+                request.Street,
+                request.City,
+                request.State
+            );
+
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok(result.Data);
+
+            return BadRequest(result.Error);
+        }
+
+        
     }
     public sealed record CreateCompanyRequest(string Name, string Description,
         IFormFile? Image, string Number, string Street, string City, string State);
+    public sealed record UpdateCompanyRequest(
+            Guid CompanyId,
+            string Name,
+            string Description,
+            IFormFile? Image,
+            string Number,
+            string Street,
+            string City,
+            string State);
 }
