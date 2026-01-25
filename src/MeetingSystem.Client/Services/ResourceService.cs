@@ -43,6 +43,14 @@ namespace MeetingSystem.Client.Services
                     }
                 }
 
+                if (model.Type == ResourceType.ParkingSpot)
+                {
+                    endpoint = "api/Resource/addParkingSpot";
+
+                    AddString(model.IsCovered.ToString(), "IsCovered");
+                
+                }
+
 
                 if (image != null)
                 {
@@ -58,7 +66,7 @@ namespace MeetingSystem.Client.Services
                     return await response.ToFailureResultAsync<Guid>("Client.Resources.AddResource");
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<Guid>();
+                var result = await response.Content.ReadFromJsonAsync<Result<Guid>>();
                 return result;
 
             }catch(Exception ex)
@@ -92,6 +100,65 @@ namespace MeetingSystem.Client.Services
                 return Result.Failure<ResourceDTO>(Error.Failure("Client.Resource.GetById", $"Network error: {ex.Message}"));
             }
             throw new NotImplementedException();
+        }
+
+        public async Task<Result<string>> UpdateResourceAsync(Guid resourceId, EditResourceInputModel model, IBrowserFile? image)
+        {
+            try
+            {
+                using var content = new MultipartFormDataContent();
+
+                void AddString(string value, string name) =>
+                    content.Add(new StringContent(value ?? string.Empty), name);
+
+                AddString(resourceId.ToString(), "ResourceId");
+                AddString(model.Name, "Name");
+                AddString(model.Description, "Description");
+                AddString(model.PricePerHour.ToString(CultureInfo.InvariantCulture), "PricePerHour");
+
+                if (image is not null)
+                {
+                    var maxFileSize = 5 * 1024 * 1024;
+                    var fileContent = new StreamContent(image.OpenReadStream(maxFileSize));
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(image.ContentType);
+                    content.Add(fileContent, "Image", image.Name);
+                }
+
+                string endpoint;
+
+                if (model.Type == ResourceType.MeetingRoom)
+                {
+                    endpoint = "api/Resource/editMeetingRoom";
+                    AddString(model.Capacity.ToString(), "Capacity");
+
+                    for (int i = 0; i < model.Features.Count; i++)
+                    {
+                        AddString(model.Features[i], $"Features[{i}]");
+                    }
+                }
+                else if (model.Type == ResourceType.ParkingSpot)
+                {
+                    endpoint = "api/Resource/editParkingSpot";
+                    AddString(model.IsCovered.ToString(), "IsCovered");
+                }
+                else
+                {
+                    return Result.Failure<string>(Error.Failure("Client.Resource.Update", "Unknown resource type"));
+                }
+
+                var response = await _http.PutAsync(endpoint, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<string>("Client.Resource.Update");
+                }
+
+                return Result.Success("Resource updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<string>(Error.Failure("Client.Resource.Update", $"Network error: {ex.Message}"));
+            }
         }
     }
 }

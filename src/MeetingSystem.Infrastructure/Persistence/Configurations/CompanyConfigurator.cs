@@ -34,7 +34,7 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(c => c.Rooms)
-                .WithOne()
+                .WithOne(r => r.Company)
                 .HasForeignKey(r => r.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
 

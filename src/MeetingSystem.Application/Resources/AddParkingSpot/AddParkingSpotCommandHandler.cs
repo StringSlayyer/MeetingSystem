@@ -31,6 +31,8 @@ namespace MeetingSystem.Application.Resources.AddParkingSpot
             }
 
             company.AddRoom(parkingSpot);
+            context.Resources.Entry(parkingSpot).State = EntityState.Added;
+
             await context.SaveChangesAsync(cancellationToken);
             return parkingSpot.Id;
         }

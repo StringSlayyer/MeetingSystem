@@ -25,6 +25,8 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
 
             builder.Property(r => r.RowVersion).IsRowVersion();
 
+
+
             var featuresConverter = new ValueConverter<List<string>, string>(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
                 v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null) ?? new List<string>()

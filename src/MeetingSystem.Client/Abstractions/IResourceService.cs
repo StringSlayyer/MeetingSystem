@@ -9,5 +9,6 @@ namespace MeetingSystem.Client.Abstractions
     {
         Task<Result<Guid>> AddResourceAsync(AddResourceInputModel model, IBrowserFile? image);
         Task<Result<ResourceDTO>> GetResourceByIdAsync(GetResourceByIdRequest request);
+        Task<Result<string>> UpdateResourceAsync(Guid resourceId, EditResourceInputModel model, IBrowserFile? image);
     }
 }

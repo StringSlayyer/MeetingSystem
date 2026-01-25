@@ -18,6 +18,7 @@ namespace MeetingSystem.Application.Resources.GetById
         {
             var resource = await context.Resources
                 .AsNoTracking()
+                .Include(r => r.Company)
                 .FirstOrDefaultAsync(r => r.Id == query.Id, cancellationToken);
 
             if(resource is null)

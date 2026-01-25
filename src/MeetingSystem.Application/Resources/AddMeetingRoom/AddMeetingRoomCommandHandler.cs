@@ -39,6 +39,7 @@ namespace MeetingSystem.Application.Resources.AddMeetingRoom
             }
 
             company.AddRoom(meetingRoom);
+            context.Resources.Entry(meetingRoom).State = EntityState.Added;
             await context.SaveChangesAsync(cancellationToken);
             return meetingRoom.Id;
         }

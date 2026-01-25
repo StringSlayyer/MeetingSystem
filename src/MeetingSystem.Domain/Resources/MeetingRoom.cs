@@ -11,5 +11,11 @@ namespace MeetingSystem.Domain.Resources
             : base(name, companyId, description, pricePerHour, imageUrl, capacity)
         {
         }
+
+        public void UpdateDetails(string name, string description, decimal pricePerHour, string? imageUrl, int capacity)
+        {
+            UpdateBaseDetails(name, description, pricePerHour, imageUrl);
+            UpdateCapacity(capacity);
+        }
     }
 }

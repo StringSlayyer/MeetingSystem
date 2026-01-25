@@ -10,10 +10,12 @@ namespace MeetingSystem.Application.Extensions
     {
         public static ResourceDTO ToDTO(this Resource resource)
         {
+            var managerId = resource.Company?.ManagerId ?? Guid.Empty;
+
             return resource switch
             {
-                MeetingRoom room => new MeetingRoomDTO(room.Id, room.CompanyId, room.Name, room.Description, room.PricePerHour, room.ImageUrl, room.Capacity, room.Features),
-                ParkingSpot spot => new ParkingSpotDTO(spot.Id, spot.CompanyId, spot.Name, spot.IsCovered, spot.Description, spot.PricePerHour, spot.ImageUrl, spot.Capacity),
+                MeetingRoom room => new MeetingRoomDTO(room.Id, room.CompanyId, managerId, room.Name, room.Description, room.PricePerHour, room.ImageUrl, room.Capacity, room.Features),
+                ParkingSpot spot => new ParkingSpotDTO(spot.Id, spot.CompanyId, managerId, spot.Name, spot.IsCovered, spot.Description, spot.PricePerHour, spot.ImageUrl, spot.Capacity),
                 _ => throw new NotImplementedException($"Resource type {resource.GetType().Name} not mapped")
             };
         }

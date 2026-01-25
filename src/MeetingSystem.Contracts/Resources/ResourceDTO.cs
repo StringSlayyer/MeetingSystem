@@ -8,6 +8,6 @@ namespace MeetingSystem.Contracts.Resources;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(MeetingRoomDTO), typeDiscriminator:"meetingRoom")]
 [JsonDerivedType(typeof(ParkingSpotDTO), typeDiscriminator: "parkingSpot")]
-public abstract record ResourceDTO(Guid Id, Guid CompanyId, string Name,
+public abstract record ResourceDTO(Guid Id, Guid CompanyId, Guid ManagerId, string Name,
     string Description, decimal PricePerHour,
         string? ImageUrl, int Capacity, List<string>? Features);

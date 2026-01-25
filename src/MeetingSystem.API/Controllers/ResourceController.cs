@@ -4,6 +4,8 @@ using MeetingSystem.Application.Resources.AddMeetingRoom;
 using MeetingSystem.Application.Resources.AddParkingSpot;
 using MeetingSystem.Application.Resources.GetByCompany;
 using MeetingSystem.Application.Resources.GetById;
+using MeetingSystem.Application.Resources.UpdateMeetingRoom;
+using MeetingSystem.Application.Resources.UpdateParkingSpot;
 using MeetingSystem.Contracts.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -68,11 +70,51 @@ namespace MeetingSystem.API.Controllers
 
             return BadRequest(result.Error);
         }
+
+        [HttpPut("editMeetingRoom")]
+        public async Task<IActionResult> UpdateMeetingRoomAsync([FromForm] UpdateMeetingRoomRequest request, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == Guid.Empty) return Unauthorized();
+            var command = new UpdateMeetingRoomCommand(request.ResourceId, userId, request.Name, request.Description, request.PricePerHour, request.Image, request.Capacity, request.Features);
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
+        }
+
+        [HttpPut("editParkingSpot")]
+        public async Task<IActionResult> UpdateParkingSpotAsync([FromForm] UpdateParkingSpotRequest request, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == Guid.Empty) return Unauthorized();
+            var command = new UpdateParkingSpotCommand(request.ResourceId, userId, request.Name, request.Description, request.PricePerHour, request.Image, request.IsCovered);
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
+        }
     }
 
     public sealed record AddMeetingRoomRequest(string Name, Guid CompanyId,
         string Description, decimal PricePerHour, IFormFile? Image, int Capacity, List<string> Features);
     public sealed record AddParkingSpotRequest(string Name, Guid CompanyId,
        string Description, decimal PricePerHour, IFormFile? Image, int Capacity, bool IsCovered);
+
+    public sealed record UpdateMeetingRoomRequest(Guid ResourceId,
+        string Name,
+        string Description,
+        decimal PricePerHour,
+        IFormFile? Image,
+        int Capacity,
+        List<string> Features);
+    public sealed record UpdateParkingSpotRequest(Guid ResourceId,
+        string Name,
+        string Description,
+        decimal PricePerHour,
+        IFormFile? Image,
+        bool IsCovered);
 
 }

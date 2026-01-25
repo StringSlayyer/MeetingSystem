@@ -1,5 +1,228 @@
-﻿<h3>EditResource</h3>
+﻿@page "/resources/{Id}/edit"
+@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Client.Models
+@using MeetingSystem.Contracts.Resources
+@using System.Globalization
+
+@inject IResourceService ResourceService
+@inject NavigationManager Nav
+@inject NotificationService NotificationService
+
+<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
+    <RadzenText TextStyle="TextStyle.H3" Class="rz-mb-6">Edit Resource</RadzenText>
+
+    @if (isLoading)
+    {
+        <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    }
+    else
+    {
+        <RadzenTemplateForm TItem="EditResourceInputModel" Data="@inputModel" Submit="@OnSubmit">
+            <RadzenStack Gap="1rem">
+                
+                <RadzenText TextStyle="TextStyle.H6" Class="rz-mt-4">General Details</RadzenText>
+                
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenFormField Text="Resource Name" Style="width: 100%;">
+                            <RadzenTextBox Name="Name" @bind-Value="@inputModel.Name" />
+                            <RadzenRequiredValidator Component="Name" Text="Name is required" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6">
+                         <RadzenFormField Text="Price Per Hour (CZK)" Style="width: 100%;">
+                            <RadzenNumeric Name="Price" 
+                                           @bind-Value="@inputModel.PricePerHour" 
+                                           Format="c" 
+                                           TValue="decimal"
+                                           Culture="@(CultureInfo.GetCultureInfo("cs-CZ"))" />
+                            <RadzenRequiredValidator Component="Price" Text="Price is required" />
+                        </RadzenFormField>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                <RadzenFormField Text="Description" Style="width: 100%;">
+                    <RadzenTextArea Name="Description" @bind-Value="@inputModel.Description" Rows="3" />
+                </RadzenFormField>
+
+                <RadzenStack Orientation="Orientation.Vertical" Gap="0.5rem">
+                    <RadzenLabel Text="Update Image" />
+                    <RadzenUpload Auto="false" Multiple="false" Accept="image/*" Change="@OnImageChange" Style="width: 100%;" />
+                    @if (selectedFile != null)
+                    {
+                        <RadzenText TextStyle="TextStyle.Caption">Selected: @selectedFile.Name</RadzenText>
+                    }
+                    else if (!string.IsNullOrEmpty(currentImageUrl))
+                    {
+                        <RadzenText TextStyle="TextStyle.Caption">Current Image:</RadzenText>
+                        <RadzenImage Path="@currentImageUrl" Style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" />
+                    }
+                </RadzenStack>
+
+                <RadzenDivider />
+
+                @if (inputModel.Type == ResourceType.MeetingRoom)
+                {
+                    <RadzenText TextStyle="TextStyle.H6" Class="rz-color-primary">Meeting Room Specifics</RadzenText>
+                    
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="4">
+                             <RadzenFormField Text="Capacity (People)" Style="width: 100%;">
+                                <RadzenNumeric @bind-Value="@inputModel.Capacity" Min="1" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="8">
+                            <RadzenFormField Text="Features" Style="width: 100%;">
+                                <ChildContent>
+                                    <RadzenTextBox Value="@tempFeatureInput"
+                                                   @oninput="@OnFeatureInput"
+                                                   Style="width: 100%;"
+                                                   Placeholder="Type feature and press Comma (e.g. Wifi, )" />
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenText TextStyle="TextStyle.Caption">Type text and press <b>Comma ( , )</b> to add.</RadzenText>
+                                </Helper>
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Class="rz-mt-2" Wrap="FlexWrap.Wrap">
+                                @foreach (var feature in inputModel.Features)
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Light" IsPill="true" Class="rz-p-2" Style="cursor: pointer;">
+                                        @feature
+                                        <RadzenIcon Icon="close" Style="font-size: 0.8rem; margin-left: 5px;" 
+                                                    @onclick="@(() => RemoveFeature(feature))" />
+                                    </RadzenBadge>
+                                }
+                            </RadzenStack>
+                            </RadzenColumn>
+                    </RadzenRow>
+                }
+                else if (inputModel.Type == ResourceType.ParkingSpot)
+                {
+                    <RadzenText TextStyle="TextStyle.H6" Class="rz-color-success">Parking Spot Specifics</RadzenText>
+                    
+                    <RadzenCard Class="rz-background-light rz-shadow-0">
+                        <RadzenCheckBox @bind-Value=@inputModel.IsCovered Name="IsCovered" />
+                        <RadzenLabel Text="Is this parking spot covered (roofed)?" Component="IsCovered" Class="rz-ml-2" />
+                    </RadzenCard>
+                }
+
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" IsBusy="@isBusy" Icon="save" Class="rz-mt-4" />
+            </RadzenStack>
+        </RadzenTemplateForm>
+    }
+</RadzenCard>
 
 @code {
+    [Parameter] public string Id { get; set; } = string.Empty;
 
+    EditResourceInputModel inputModel = new();
+    
+    string tempFeatureInput = ""; 
+    
+    IBrowserFile? selectedFile;
+    bool isBusy = false;
+    bool isLoading = true;
+    string currentImageUrl = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+
+        if (Guid.TryParse(Id, out var resourceId))
+        {
+            var result = await ResourceService.GetResourceByIdAsync(new(resourceId));
+
+            if (result.IsSuccess)
+            {
+                var data = result.Data; 
+
+                inputModel.Name = data.Name;
+                inputModel.Description = data.Description;
+                inputModel.PricePerHour = data.PricePerHour;
+                
+                if (data is MeetingRoomDTO room)
+                {
+                    inputModel.Type = ResourceType.MeetingRoom; 
+                    inputModel.Capacity = room.Capacity;
+                    inputModel.Features = room.Features?.ToList() ?? new();
+                }
+                else if (data is ParkingSpotDTO spot)
+                {
+                    inputModel.Type = ResourceType.ParkingSpot;
+                    inputModel.IsCovered = spot.IsCovered;
+                }
+
+                if (!string.IsNullOrEmpty(data.ImageUrl))
+                {
+                    currentImageUrl = $"http://localhost:8080/api/files/{data.ImageUrl}";
+                }
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Resource not found");
+                Nav.NavigateTo("/resources");
+            }
+        }
+        else
+        {
+             NotificationService.Notify(NotificationSeverity.Error, "Error", "Invalid ID format");
+             Nav.NavigateTo("/resources");
+        }
+
+        isLoading = false;
+    }
+
+    void OnFeatureInput(ChangeEventArgs args)
+    {
+        string val = args.Value?.ToString() ?? "";
+
+        if (val.Contains(","))
+        {
+            var newFeatures = val.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                 .Select(f => f.Trim())
+                                 .Where(f => !string.IsNullOrEmpty(f));
+
+            foreach (var f in newFeatures)
+            {
+                if (!inputModel.Features.Contains(f))
+                {
+                    inputModel.Features.Add(f);
+                }
+            }
+
+            tempFeatureInput = "";
+        }
+        else
+        {
+            tempFeatureInput = val;
+        }
+    }
+
+    void RemoveFeature(string feature)
+    {
+        inputModel.Features.Remove(feature);
+    }
+
+    void OnImageChange(UploadChangeEventArgs args)
+    {
+        selectedFile = args.Files.FirstOrDefault();
+    }
+
+    async Task OnSubmit()
+    {
+        isBusy = true;
+        var result = await ResourceService.UpdateResourceAsync(Guid.Parse(Id), inputModel, selectedFile);
+
+        if (result.IsSuccess)
+        {
+            NotificationService.Notify(NotificationSeverity.Success, "Success", "Resource updated!");
+            Nav.NavigateTo($"/resources/{Id}"); 
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
+        }
+        isBusy = false;
+    }
 }

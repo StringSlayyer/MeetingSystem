@@ -20,7 +20,7 @@ namespace MeetingSystem.Client.Services
                     return await response.ToFailureResultAsync<UserDashboardDTO>("Client.Dashboard");
                 }
 
-                var dashboardResponse = await response.Content.ReadFromJsonAsync<UserDashboardDTO>();
+                var dashboardResponse = await response.Content.ReadFromJsonAsync<Result<UserDashboardDTO>>();
 
                 if (dashboardResponse == null)
                 {
