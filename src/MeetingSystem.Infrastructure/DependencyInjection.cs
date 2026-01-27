@@ -4,6 +4,7 @@ using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Infrastructure.DomainEvents;
 using MeetingSystem.Infrastructure.Messaging;
 using MeetingSystem.Infrastructure.Persistence;
+using MeetingSystem.Infrastructure.Persistence.Seeders;
 using MeetingSystem.Infrastructure.Services;
 using MeetingSystem.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,7 @@ namespace MeetingSystem.Infrastructure
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<IDispatcher, Dispatcher>();
             services.AddScoped<IFileStorageService, FileStorageService>();
+            services.AddScoped<IDataSeeder, DataSeeder>();
             return services;
         }
 

@@ -25,7 +25,6 @@ builder
              options.TokenValidationParameters =
                  new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                  {
-                     // konfigurace validaèních parametrù pro access tokeny
                      ValidateIssuer = true,
                      ValidateAudience = true,
                      ValidateLifetime = true,
@@ -40,7 +39,6 @@ builder
 
 builder.Services.AddSwaggerGen(options =>
 {
-    // 1. Define the Security Scheme (Definition remains mostly the same)
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -51,15 +49,12 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer"
     });
 
-    // 2. Add the Security Requirement (UPDATED for .NET 10 / OpenAPI v2)
-    // Note: We now pass a lambda 'document =>' to construct the requirement
     options.AddSecurityRequirement(document =>
     {
         return new OpenApiSecurityRequirement
         {
             {
-                // In .NET 10 / Microsoft.OpenApi v2, we use OpenApiSecuritySchemeReference
-                // explicitly instead of setting a .Reference property.
+
                 new OpenApiSecuritySchemeReference("Bearer", document),
                 new List<string>()
             }
@@ -86,13 +81,14 @@ builder.Services.AddCors(opt =>
 
 var app = builder.Build();
 
+await app.InitializeDatabaseAsync();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
-    //app.ApplyMigrations();
 }
 
 //app.UseHttpsRedirection();

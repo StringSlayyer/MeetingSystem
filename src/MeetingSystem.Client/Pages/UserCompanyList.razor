@@ -8,13 +8,9 @@
 <div style="max-width: 1200px; margin: 0 auto;">
 
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Class="rz-mb-4">
-
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-            <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Class="rz-m-0">Companies</RadzenText>
+            <RadzenText TextStyle="TextStyle.H4" TagName="TagName.H1" Class="rz-m-0">My Companies</RadzenText>
         </RadzenStack>
-
-       
-
     </RadzenStack>
 
     <RadzenDataList WrapItems="true" AllowPaging="true"
@@ -22,18 +18,28 @@
                     TItem="CompanyDTO" PagerPosition="PagerPosition.Bottom">
         <Template Context="company">
 
-            <RadzenCard Class="company-card rz-shadow-2" Style="width: 350px; margin: 12px; cursor: pointer;"
+            <RadzenCard Class="company-card rz-shadow-2" Style="width: 100%; max-width: 350px; margin: 12px; cursor: pointer;"
                         @onclick="@(() => OpenCompany(company.Id))">
 
-                <div class="card-header-image"
-                     style="background-image: url('@(GetImageUrl(company))'); background-color: @GetRandomColor(company.Name);">
+                @{
+                    bool hasImage = !string.IsNullOrEmpty(company.ImageUrl);
+                    string bgImage = hasImage ? $"url('{GetImageUrl(company)}')" : "none";
+                    string bgColor = hasImage ? "transparent" : GetRandomColor(company.Name);
+                    string cssClass = hasImage ? "card-cover-image" : "card-cover-image no-image";
+                }
+
+                <div class="@cssClass" style="background-image: @bgImage; background-color: @bgColor;">
+
+                    @if (!hasImage)
+                    {
+                        <RadzenIcon Icon="apartment" />
+                    }
 
                     <div class="rating-badge">
                         <span>@company.Rating.ToString("0.0")</span>
                         <RadzenIcon Icon="star" Style="font-size: 12px; color: black;" />
                     </div>
                 </div>
-
                 <div class="rz-p-3" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <RadzenText TextStyle="TextStyle.Subtitle1" TagName="TagName.H3" Style="font-weight: bold; margin-bottom: 0.5rem;">
@@ -73,7 +79,6 @@
 @code {
     List<CompanyDTO> companies;
     int totalCount;
-    string sortBy = "Most Booked";
 
     string GetImageUrl(CompanyDTO c) =>
         string.IsNullOrEmpty(c.ImageUrl) ? "none" : $"http://localhost:8080/api/files/{c.ImageUrl}";
@@ -90,7 +95,6 @@
         int pageNumber = (args.Skip ?? 0) / (args.Top ?? 9) + 1;
         int pageSize = args.Top ?? 9;
 
-        
         var result = await CompanyService.GetCompaniesByUserAsync(pageNumber, pageSize);
 
         if (result.IsSuccess)
@@ -100,15 +104,8 @@
         }
     }
 
-    async Task OnSearch()
-    {
-        
-        await LoadData(new LoadDataArgs { Top = 9, Skip = 0 });
-    }
-    async Task OnSort() { await LoadData(new LoadDataArgs { Top = 9, Skip = 0 }); }
-
     void OpenCompany(Guid id)
     {
-        Nav.NavigateTo($"/companies/my/{id}");
+        Nav.NavigateTo($"/companies/{id}");
     }
 }

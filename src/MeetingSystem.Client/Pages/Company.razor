@@ -22,7 +22,20 @@ else
         </RadzenStack>
     }
     <RadzenCard Variant="Variant.Outlined" Style="border-radius:16px;">
-        <RadzenCard Variant="Variant.Flat" class="image-container rz-mb-4 rz-mt-0">
+        @{
+            bool hasImage = !string.IsNullOrEmpty(data.ImageUrl);
+            string bgUrl = hasImage ? $"http://localhost:8080/api/files/{data.ImageUrl}" : "none";
+            string bgColor = hasImage ? "transparent" : GetRandomColor(data.Name);
+        }
+
+        <RadzenCard Variant="Variant.Flat" Class="rz-mb-4 rz-mt-0"
+                    Style="@($"height: 200px; background-size: cover; background-position: center; background-image: url('{bgUrl}'); background-color: {bgColor}; display: flex; align-items: center; justify-content: center;")">
+
+            @if (!hasImage)
+            {
+                <RadzenIcon Icon="domain" Style="font-size: 80px; color: rgba(255,255,255,0.5);" />
+            }
+
         </RadzenCard>
         <RadzenStack>
 
