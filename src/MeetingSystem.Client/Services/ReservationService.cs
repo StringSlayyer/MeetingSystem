@@ -10,6 +10,26 @@ namespace MeetingSystem.Client.Services
     public class ReservationService(HttpClient client) : IReservationService
     {
         private readonly HttpClient _http = client;
+
+        public async Task<Result> CancelReservationAsync(Guid reservationId)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"api/Reservation/{reservationId}/cancel");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<string>("Reservation.Cancel");
+                }
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(Error.Failure("Client.Reservation", ex.Message));
+            }
+        }
+
         public async Task<Result<Guid>> CreateReservationAsync(CreateReservationRequest request)
         {
             try

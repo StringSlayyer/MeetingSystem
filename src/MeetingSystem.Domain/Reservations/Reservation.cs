@@ -41,5 +41,15 @@ namespace MeetingSystem.Domain.Reservations
 
             Status = ReservationStatus.Confirmed;
         }
+
+        public void Cancel()
+        {
+            if (!Status.CanTransitionTo(ReservationStatus.Cancelled))
+            {
+                throw new Exception("Cannot cancel this reservation.");
+            }
+
+            Status = ReservationStatus.Cancelled;
+        }
     }
 }

@@ -15,8 +15,8 @@ namespace MeetingSystem.Application.Extensions
                 reservation.ResourceId,
                 resourceName,
                 reservation.UserId,
-                reservation.TimeSlot.Start,
-                reservation.TimeSlot.End,
+                DateTime.SpecifyKind(reservation.TimeSlot.Start, DateTimeKind.Utc),
+                DateTime.SpecifyKind(reservation.TimeSlot.End, DateTimeKind.Utc),
                 reservation.Status.Name,
                 reservation.Note);
         }

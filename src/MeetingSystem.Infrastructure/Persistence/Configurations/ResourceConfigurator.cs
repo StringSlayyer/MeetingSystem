@@ -50,7 +50,8 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
             builder.HasDiscriminator<string>("ResourceType")
                 .HasValue<MeetingRoom>("MeetingRoom")
                 .HasValue<ParkingSpot>("ParkingSpot");
-                
+
+            builder.HasQueryFilter(r => !r.IsDeleted);
         }
     }
 

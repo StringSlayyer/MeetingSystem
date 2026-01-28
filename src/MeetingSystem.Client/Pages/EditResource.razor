@@ -7,6 +7,7 @@
 @inject IResourceService ResourceService
 @inject NavigationManager Nav
 @inject NotificationService NotificationService
+@inject DialogService DialogService 
 
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
     <RadzenText TextStyle="TextStyle.H3" Class="rz-mb-6">Edit Resource</RadzenText>
@@ -59,7 +60,6 @@
                     }
                 </RadzenStack>
 
-                <RadzenDivider />
 
                 @if (inputModel.Type == ResourceType.MeetingRoom)
                 {
@@ -107,7 +107,12 @@
                     </RadzenCard>
                 }
 
-                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" IsBusy="@isBusy" Icon="save" Class="rz-mt-4" />
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Class="rz-mt-4">
+                     <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" IsBusy="@isBusy" Icon="save" ButtonStyle="ButtonStyle.Primary" />
+                     
+                     <RadzenButton Text="Delete Resource" Icon="delete" ButtonStyle="ButtonStyle.Danger" Click="@OnDelete" IsBusy="@isBusy" />
+                </RadzenStack>
+
             </RadzenStack>
         </RadzenTemplateForm>
     }
@@ -124,14 +129,15 @@
     bool isBusy = false;
     bool isLoading = true;
     string currentImageUrl = "";
+    Guid parsedResourceId; 
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
 
-        if (Guid.TryParse(Id, out var resourceId))
+        if (Guid.TryParse(Id, out parsedResourceId))
         {
-            var result = await ResourceService.GetResourceByIdAsync(new(resourceId));
+            var result = await ResourceService.GetResourceByIdAsync(new(parsedResourceId));
 
             if (result.IsSuccess)
             {
@@ -212,7 +218,7 @@
     async Task OnSubmit()
     {
         isBusy = true;
-        var result = await ResourceService.UpdateResourceAsync(Guid.Parse(Id), inputModel, selectedFile);
+        var result = await ResourceService.UpdateResourceAsync(parsedResourceId, inputModel, selectedFile);
 
         if (result.IsSuccess)
         {
@@ -224,5 +230,27 @@
             NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
         }
         isBusy = false;
+    }
+
+    async Task OnDelete()
+    {
+        var confirmed = await DialogService.Confirm("Are you sure you want to delete this resource? If there are active reservations, deletion will fail.", "Delete Resource", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (confirmed == true)
+        {
+            isBusy = true;
+            var result = await ResourceService.DeleteResourceAsync(parsedResourceId); 
+
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Deleted", "Resource deleted successfully.");
+                Nav.NavigateTo("/resources"); 
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Cannot Delete", result.Error.Description);
+            }
+            isBusy = false;
+        }
     }
 }

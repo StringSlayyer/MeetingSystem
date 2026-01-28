@@ -1,5 +1,6 @@
 ﻿using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
+using MeetingSystem.Application.Reservations.Cancel;
 using MeetingSystem.Application.Reservations.Create;
 using MeetingSystem.Application.Reservations.GetByResource;
 using MeetingSystem.Contracts.Reservations;
@@ -41,6 +42,21 @@ namespace MeetingSystem.API.Controllers
             var result = await _dispatcher.Query(query, cancellationToken);
 
             if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
+        }
+
+        [HttpDelete("{reservationId}/cancel")]
+        public async Task<IActionResult> CancelReservationAsync(Guid reservationId, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == null || userId == Guid.Empty) return Unauthorized();
+
+            var command = new CancelReservationCommand(userId, reservationId);
+
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok();
 
             return BadRequest(result.Error);
         }

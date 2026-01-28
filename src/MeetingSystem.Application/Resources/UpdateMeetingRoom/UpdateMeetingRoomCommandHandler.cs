@@ -31,16 +31,26 @@ namespace MeetingSystem.Application.Resources.UpdateMeetingRoom
             }
 
             string? newImageUrl = null;
+            string? oldImageUrl = room.ImageUrl; 
+
             if (command.Image is not null && command.Image.Length > 0)
             {
-                var imgResult = await fileStorageService.UploadFile(FileType.RESOURCE_IMAGE, command.Image, room.CompanyId, room.Id);
-                if (imgResult.IsSuccess)
+                var uploadResult = await fileStorageService.UploadFile(
+                    FileType.RESOURCE_IMAGE,
+                    command.Image,
+                    room.CompanyId,
+                    room.Id);
+
+                if (!uploadResult.IsSuccess)
                 {
-                    newImageUrl = imgResult.Data;
+                    return Result.Failure<Guid>(uploadResult.Error);
                 }
+
+                newImageUrl = uploadResult.Data;
             }
 
-            room.UpdateDetails(command.Name, command.Description, command.PricePerHour, newImageUrl, command.Capacity);
+            room.UpdateDetails(command.Name, command.Description, command.PricePerHour,
+                newImageUrl ?? room.ImageUrl, command.Capacity);
 
             room.ClearFeatures();
             foreach (var feature in command.Features)
@@ -49,6 +59,11 @@ namespace MeetingSystem.Application.Resources.UpdateMeetingRoom
             }
 
             await context.SaveChangesAsync(cancellationToken);
+
+            if (newImageUrl is not null && !string.IsNullOrEmpty(oldImageUrl))
+            {
+                await fileStorageService.DeleteFileAsync(oldImageUrl);
+            }
             return room.Id;
         }
     }

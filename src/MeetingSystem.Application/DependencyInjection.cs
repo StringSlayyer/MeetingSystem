@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Behaviors;
+﻿using FluentValidation;
+using MeetingSystem.Application.Abstractions.Behaviors;
 using MeetingSystem.Application.Abstractions.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
@@ -23,6 +24,8 @@ namespace MeetingSystem.Application
                     .AsImplementedInterfaces()
                     .WithScopedLifetime());
 
+            services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
+
             services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
                 .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
                    .AsImplementedInterfaces()
@@ -31,6 +34,10 @@ namespace MeetingSystem.Application
             services.TryDecorate(typeof(ICommandHandler<>), typeof(ExceptionHandlingDecorator.CommandHandler<>));
             services.TryDecorate(typeof(ICommandHandler<,>), typeof(ExceptionHandlingDecorator.CommandHandler<,>));
             services.TryDecorate(typeof(IQueryHandler<,>), typeof(ExceptionHandlingDecorator.QueryHandler<,>));
+
+            services.TryDecorate(typeof(ICommandHandler<>), typeof(ValidationDecorator.CommandHandler<>));
+            services.TryDecorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
+            services.TryDecorate(typeof(IQueryHandler<,>), typeof(ValidationDecorator.QueryHandler<,>));
 
             return services;
         }

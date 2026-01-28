@@ -31,18 +31,34 @@ namespace MeetingSystem.Application.Resources.UpdateParkingSpot
             }
 
             string? newImageUrl = null;
+            string? oldImageUrl = spot.ImageUrl;
+
             if (command.Image is not null && command.Image.Length > 0)
             {
-                var imgResult = await fileStorageService.UploadFile(FileType.RESOURCE_IMAGE, command.Image, spot.CompanyId, spot.Id);
-                if (imgResult.IsSuccess)
+                var uploadResult = await fileStorageService.UploadFile(
+                    FileType.RESOURCE_IMAGE,
+                    command.Image,
+                    spot.CompanyId,
+                    spot.Id);
+
+                if (!uploadResult.IsSuccess)
                 {
-                    newImageUrl = imgResult.Data;
+                    return Result.Failure<Guid>(uploadResult.Error);
                 }
+
+                newImageUrl = uploadResult.Data;
             }
 
-            spot.UpdateDetails(command.Name, command.Description, command.PricePerHour, newImageUrl, command.IsCovered);
+            spot.UpdateDetails(command.Name, command.Description, command.PricePerHour,
+                newImageUrl ?? spot.ImageUrl, command.IsCovered);
 
             await context.SaveChangesAsync(cancellationToken);
+
+            if (newImageUrl is not null && !string.IsNullOrEmpty(oldImageUrl))
+            {
+                await fileStorageService.DeleteFileAsync(oldImageUrl);
+            }
+
             return spot.Id;
         }
     

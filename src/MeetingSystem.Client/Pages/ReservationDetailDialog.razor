@@ -12,8 +12,6 @@
         <RadzenBadge BadgeStyle="@GetStatusColor(Reservation.Status)" Text="@Reservation.Status" />
     </RadzenStack>
 
-    <RadzenHr />
-
     <RadzenRow>
         <RadzenColumn Size="6">
             <RadzenText TextStyle="TextStyle.Caption" Class="rz-color-gray-dark">Start</RadzenText>
@@ -36,13 +34,14 @@
     <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="1rem" Class="rz-mt-4">
         <RadzenButton Text="Close" ButtonStyle="ButtonStyle.Light" Click="@(() => DialogService.Close(false))" />
 
-        @if (Reservation.Status != "Cancelled")
+     
+        @if (CanCancel)
         {
-            <RadzenButton Text="Cancel Reservation" 
-                          ButtonStyle="ButtonStyle.Danger" 
-                          Variant="Variant.Flat" 
-                          Icon="cancel" 
-                          Click="@OnCancel" 
+            <RadzenButton Text="Cancel Reservation"
+                          ButtonStyle="ButtonStyle.Danger"
+                          Variant="Variant.Flat"
+                          Icon="cancel"
+                          Click="@OnCancel"
                           IsBusy="@isBusy" />
         }
     </RadzenStack>
@@ -51,8 +50,14 @@
 
 @code {
     [Parameter] public ReservationDTO Reservation { get; set; } = default!;
+    [Parameter] public Guid CurrentUserId { get; set; }
+    [Parameter] public bool IsResourceOwner { get; set; }
 
     bool isBusy = false;
+
+    bool CanCancel =>
+        Reservation.Status != "Cancelled" &&
+        (Reservation.UserId == CurrentUserId || IsResourceOwner);
 
     BadgeStyle GetStatusColor(string status) => status switch
     {
@@ -67,24 +72,23 @@
         var confirm = await DialogService.Confirm("Are you sure you want to cancel this reservation?", "Cancel Reservation", 
             new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
 
-     /*   if (confirm == true)
+        if (confirm == true)
         {
             isBusy = true;
             
-            // Assuming you have a cancel method
-            //var result = await ReservationService.CancelReservationAsync(Reservation.Id);
+            var result = await ReservationService.CancelReservationAsync(Reservation.Id);
 
             isBusy = false;
 
             if (result.IsSuccess)
             {
                 NotificationService.Notify(NotificationSeverity.Success, "Cancelled", "Reservation has been cancelled.");
-                DialogService.Close(true); // Return true to refresh parent
+                DialogService.Close(true); 
             }
             else
             {
                 NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
             }
-        }*/
+        }
     }
 }

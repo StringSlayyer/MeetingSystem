@@ -20,7 +20,7 @@ namespace MeetingSystem.Infrastructure.Services
         private readonly List<string> _allowedExtensions = [".jpg", ".jpeg", ".png", ".heic", ".heif", ".mp4", ".hevc"];
         public FileStorageService(IConfiguration configuration, ILogger<FileStorageService> logger)
         {
-            _fileStoragePath = configuration["FILE_STORAGE_PATH"];
+            _fileStoragePath = configuration["FILE_STORAGE_PATH"].Trim();
             _logger = logger;
         }
         public async Task<Result<string>> UploadFile(FileType fileType, IFormFile file, Guid? companyId = null, Guid? resourceId = null)
@@ -66,7 +66,6 @@ namespace MeetingSystem.Infrastructure.Services
 
         public async Task<string> SaveFileAsync(string path, string fileName, Stream fileStream)
         {
-            _fileStoragePath.Trim();
             Directory.CreateDirectory(_fileStoragePath);
             var directory = Path.Combine(_fileStoragePath, path);
             Directory.CreateDirectory(directory);
@@ -81,11 +80,31 @@ namespace MeetingSystem.Infrastructure.Services
             return response;
         }
 
-        public void DeleteFile(string filePath)
+        public async Task<Result> DeleteFileAsync(string relativeFilePath)
         {
-            if (File.Exists(filePath))
+            try
             {
-                File.Delete(filePath);
+                var fullPath = Path.Combine(_fileStoragePath, relativeFilePath);
+
+                if (!File.Exists(fullPath))
+                {
+                    return Result.Failure(FileStorageError.FileDoesntExist);
+                }
+
+                File.Delete(fullPath);
+                _logger.LogInformation("File deleted successfully: {Path}", fullPath);
+
+                return Result.Success();
+            }
+            catch (IOException ex)
+            {
+                _logger.LogError(ex, "File is in use and cannot be deleted: {Path}", relativeFilePath);
+                return Result.Failure(Error.Failure("FileStorage.FileLocked", "The file is currently in use and cannot be deleted."));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting file: {Path}", relativeFilePath);
+                return Result.Failure(Error.Failure("FileStorage.DeleteFailed", $"Unexpected error: {ex.Message}"));
             }
         }
 

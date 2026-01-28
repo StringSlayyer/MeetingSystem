@@ -13,6 +13,6 @@ namespace MeetingSystem.Application.Abstractions.Services
         Task<Result<string>> UploadFile(FileType fileType, IFormFile file, Guid? companyId = null, Guid? resourceId = null);
         Task<string> SaveFileAsync(string path, string fileName, Stream fileStream);
         Task<Result<ReturnFileDTO>> ReturnFile(string filePath);
-        void DeleteFile(string filePath);
+        Task<Result> DeleteFileAsync(string relativeFilePath);
     }
 }

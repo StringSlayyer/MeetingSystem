@@ -174,5 +174,26 @@ namespace MeetingSystem.Client.Services
                 return Result.Failure<string>(Error.Failure("Client.Companies.Update", $"Network error: {ex.Message}"));
             }
         }
+
+        public async Task<Result> DeleteCompanyAsync(Guid companyId)
+        {
+            try
+            {
+                var url = $"api/Company/delete?companyId={companyId}";
+
+                var response = await _http.DeleteAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<string>("Client.Companies.Delete");
+                }
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(Error.Failure("Client.Companies.Delete", $"Network error: {ex.Message}"));
+            }
+        }
     }
 }

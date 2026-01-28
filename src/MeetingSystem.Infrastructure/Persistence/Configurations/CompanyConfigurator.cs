@@ -40,6 +40,8 @@ namespace MeetingSystem.Infrastructure.Persistence.Configurations
 
             builder.Navigation(c => c.Rooms)
                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.HasQueryFilter(c => !c.IsDeleted);
         }
     }
 }

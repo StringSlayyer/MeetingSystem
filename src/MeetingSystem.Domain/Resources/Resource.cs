@@ -21,6 +21,7 @@ namespace MeetingSystem.Domain.Resources
         public int Capacity { get; private set; }
         public List<string> Features { get; private set; } = new();
         public DateTime LastBookingUpdate { get; private set;  }
+        public bool IsDeleted { get; private set; } = false;
 
         [Timestamp]
         public byte[] RowVersion { get; private set; }
@@ -68,6 +69,11 @@ namespace MeetingSystem.Domain.Resources
         public void NotifyReservationMade()
         {
             LastBookingUpdate = DateTime.UtcNow;
+        }
+
+        public void SoftDelete()
+        {
+            IsDeleted = true;
         }
         
     }

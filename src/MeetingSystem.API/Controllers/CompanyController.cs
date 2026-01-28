@@ -1,6 +1,7 @@
 ﻿using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Companies.CreateCompany;
+using MeetingSystem.Application.Companies.Delete;
 using MeetingSystem.Application.Companies.GetById;
 using MeetingSystem.Application.Companies.GetByUser;
 using MeetingSystem.Application.Companies.GetCompanies;
@@ -94,7 +95,18 @@ namespace MeetingSystem.API.Controllers
             return BadRequest(result.Error);
         }
 
-        
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteCompanyAsync([FromQuery] Guid companyId, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == null || userId == Guid.Empty) return Unauthorized();
+            var command = new DeleteCompanyCommand(userId, companyId);
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok();
+
+            return BadRequest(result.Error);
+        }
     }
     public sealed record CreateCompanyRequest(string Name, string Description,
         IFormFile? Image, string Number, string Street, string City, string State);

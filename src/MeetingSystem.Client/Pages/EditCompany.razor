@@ -6,6 +6,7 @@
 @inject ICompanyService CompanyService
 @inject NavigationManager Nav
 @inject NotificationService NotificationService
+@inject DialogService DialogService 
 
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
     <RadzenText TextStyle="TextStyle.H3" Class="rz-mb-6">Edit Company</RadzenText>
@@ -17,8 +18,7 @@
     else
     {
         <RadzenTemplateForm TItem="CreateCompanyInputModel" Data="@inputModel" Submit="@OnSubmit">
-           
-
+            
             <RadzenStack Gap="1rem">
                 <RadzenText TextStyle="TextStyle.H6" Class="rz-mt-4">General Information</RadzenText>
 
@@ -107,7 +107,13 @@
                     <RadzenImage Path="@currentImageUrl" Style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" />
                 }
 
-                <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" IsBusy="@isBusy" Icon="save" />
+                @* --- BUTTONS SECTION --- *@
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Class="rz-mt-4">
+                     <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" IsBusy="@isBusy" Icon="save" ButtonStyle="ButtonStyle.Primary" />
+                     
+                     <RadzenButton Text="Delete Company" Icon="delete" ButtonStyle="ButtonStyle.Danger" Click="@OnDelete" IsBusy="@isBusy" />
+                </RadzenStack>
+
             </RadzenStack>
         </RadzenTemplateForm>
     }
@@ -177,5 +183,27 @@
         }
 
         isBusy = false;
+    }
+
+    async Task OnDelete()
+    {
+        var confirmed = await DialogService.Confirm("Are you sure you want to delete this company? This cannot be undone.", "Delete Company", new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (confirmed == true)
+        {
+            isBusy = true;
+            var result = await CompanyService.DeleteCompanyAsync(Guid.Parse(Id)); 
+
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Deleted", "Company deleted successfully.");
+                Nav.NavigateTo("/companies"); 
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Cannot Delete", result.Error.Description);
+            }
+            isBusy = false;
+        }
     }
 }

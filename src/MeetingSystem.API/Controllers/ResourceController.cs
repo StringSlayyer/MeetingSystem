@@ -1,11 +1,14 @@
 ﻿using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
+using MeetingSystem.Application.Companies.Delete;
 using MeetingSystem.Application.Resources.AddMeetingRoom;
 using MeetingSystem.Application.Resources.AddParkingSpot;
+using MeetingSystem.Application.Resources.Delete;
 using MeetingSystem.Application.Resources.GetByCompany;
 using MeetingSystem.Application.Resources.GetById;
 using MeetingSystem.Application.Resources.UpdateMeetingRoom;
 using MeetingSystem.Application.Resources.UpdateParkingSpot;
+using MeetingSystem.Contracts.Companies;
 using MeetingSystem.Contracts.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +96,19 @@ namespace MeetingSystem.API.Controllers
             var result = await _dispatcher.Send(command, cancellationToken);
 
             if (result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
+        }
+
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteCompanyAsync([FromQuery] Guid resourceId, CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == null || userId == Guid.Empty) return Unauthorized();
+            var command = new DeleteResourceCommand(userId, resourceId);
+            var result = await _dispatcher.Send(command, cancellationToken);
+
+            if (result.IsSuccess) return Ok();
 
             return BadRequest(result.Error);
         }

@@ -5,6 +5,7 @@
 @using MeetingSystem.Contracts.Reservations
 @using MeetingSystem.Contracts.Resources
 @using Microsoft.AspNetCore.Components.Authorization
+@using System.Globalization
 
 @inject IResourceService ResourceService
 @inject IReservationService ReservationService
@@ -16,84 +17,105 @@
 
 @if (resource == null && isLoading)
 {
-    <RadzenProgressBar Value="100" Mode="ProgressBarMode.Indeterminate" />
+    <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
 }
-else
+else if (resource != null)
 {
-    @if (isOwner)
-    {
-        <RadzenStack>
-            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
-                          Click="@NavigateToEdit" Tooltip="Edit Resource" />
-            }
-        </RadzenStack>
-    }
-    <RadzenCard Variant="Variant.Outlined" Class="rz-mb-4" Style="border-radius:16px;">
-        <RadzenRow AlignItems="AlignItems.Center">
-            <RadzenColumn Size="12" SizeMD="3">
-                @if (!string.IsNullOrEmpty(resource.ImageUrl))
-                {
-                    <RadzenImage Path="@($"http://localhost:8080/api/files/{resource.ImageUrl}")"
-                                 Style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;" />
-                }
-                else
-                {
-                    <div style="width: 100%; height: 150px; background-color: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        @if (resource is MeetingRoomDTO)
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Class="rz-mb-4">
+        <RadzenButton Icon="arrow_back" Text="Back to Company" 
+                      ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" 
+                      Click="@(() => Nav.NavigateTo($"/companies/{resource.CompanyId}"))" />
+
+        @if (isOwner)
+        {
+            <RadzenButton Text="Edit Resource" Icon="edit" ButtonStyle="ButtonStyle.Warning" Click="@NavigateToEdit" />
+        }
+    </RadzenStack>
+
+    
+        bool hasImage = !string.IsNullOrEmpty(resource.ImageUrl);
+        string bgUrl = hasImage ? $"http://localhost:8080/api/files/{resource.ImageUrl}" : "none";
+    
+
+    <RadzenCard Variant="Variant.Flat" Class="rz-mb-4 rz-mt-0"
+                Style="@($"height: 250px; border-radius: 16px; background-size: cover; background-position: center; background-image: url('{bgUrl}'); background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;")">
+        
+        @if (!hasImage)
+        {
+             <RadzenIcon Icon="@(resource is MeetingRoomDTO ? "meeting_room" : "local_parking")" Style="font-size: 80px; color: #d1d5db;" />
+        }
+    </RadzenCard>
+
+    <RadzenCard Variant="Variant.Outlined" Class="rz-mb-4" Style="border-radius: 16px;">
+        <RadzenRow AlignItems="AlignItems.Start" JustifyContent="JustifyContent.SpaceBetween">
+            
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenStack Gap="0.5rem">
+                    <RadzenText TextStyle="TextStyle.H3" Style="font-weight: 800; margin: 0; color: var(--rz-primary);">@resource.Name</RadzenText>
+                    
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" AlignItems="AlignItems.Center">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem" AlignItems="AlignItems.Center">
+                            <RadzenIcon Icon="@(resource is MeetingRoomDTO ? "meeting_room" : "local_parking")" Style="color: var(--rz-text-secondary-color);" />
+                            <RadzenText TextStyle="TextStyle.Body1" Style="font-weight: 600;">
+                                @(resource is MeetingRoomDTO ? "Meeting Room" : "Parking Spot")
+                            </RadzenText>
+                        </RadzenStack>
+
+                        @if(resource is MeetingRoomDTO room)
                         {
-                            <RadzenIcon Icon="meeting_room" Style="font-size: 48px; color: #9ca3af;" />
-                        }
-                        else
-                        {
-                            <RadzenIcon Icon="local_parking" Style="font-size: 48px; color: #9ca3af;" />
-                        }
-                    </div>
-                }
-            </RadzenColumn>
-
-            <RadzenColumn Size="12" SizeMD="9">
-                <RadzenStack>
-                    <RadzenRow JustifyContent="JustifyContent.SpaceBetween">
-                        <RadzenText TextStyle="TextStyle.H4" Style="margin: 0;">@resource.Name</RadzenText>
-                        <RadzenBadge BadgeStyle="BadgeStyle.Success" Text="@($"{resource.PricePerHour:C} / hr")" Style="font-size: 1.2rem; padding: 0.5rem;" />
-                    </RadzenRow>
-
-                    <RadzenText TextStyle="TextStyle.Body1">@resource.Description</RadzenText>
-
-                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem">
-                        <RadzenIcon Icon="people" />
-                        <RadzenText TextStyle="TextStyle.Body2">Capacity: @resource.Capacity</RadzenText>
-
-                        @if (resource is MeetingRoomDTO room)
-                        {
-                            <RadzenIcon Icon="meeting_room" />
-                            <RadzenText TextStyle="TextStyle.Body2">Meeting Room</RadzenText>
-                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Class="rz-mt-2" Wrap="FlexWrap.Wrap">
-                                @foreach (var feature in resource.Features)
-                                {
-                                    <RadzenBadge BadgeStyle="BadgeStyle.Light" IsPill="true" Class="rz-p-2" Style="cursor: pointer;">
-                                        @feature
-                                    </RadzenBadge>
-                                }
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.2rem" AlignItems="AlignItems.Center">
+                                <RadzenIcon Icon="groups" Style="color: var(--rz-text-secondary-color);" />
+                                <RadzenText TextStyle="TextStyle.Body1">Capacity: @room.Capacity</RadzenText>
                             </RadzenStack>
                         }
-                        else if (resource is ParkingSpotDTO spot)
-                        {
-                            <RadzenIcon Icon="local_parking" />
-                            <RadzenText TextStyle="TextStyle.Body2">@(spot.IsCovered ? "Covered Spot" : "Open Spot")</RadzenText>
-                        }
                     </RadzenStack>
+
+                    <RadzenText TextStyle="TextStyle.Body1" Class="rz-mt-2" Style="color: var(--rz-text-secondary-color);">
+                        @resource.Description
+                    </RadzenText>
+
+                    @if (resource is MeetingRoomDTO roomDTO && roomDTO.Features.Any())
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Wrap="FlexWrap.Wrap" Class="rz-mt-2">
+                            @foreach (var feature in roomDTO.Features)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Info" IsPill="true" Text="@feature" Class="rz-p-2" />
+                            }
+                        </RadzenStack>
+                    }
+                    else if (resource is ParkingSpotDTO spot)
+                    {
+                         <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Class="rz-mt-2">
+                             <RadzenBadge BadgeStyle="@(spot.IsCovered ? BadgeStyle.Success : BadgeStyle.Warning)" 
+                                          IsPill="true" 
+                                          Text="@(spot.IsCovered ? "Covered Roof" : "Open Sky")" 
+                                          Class="rz-p-2" />
+                         </RadzenStack>
+                    }
                 </RadzenStack>
             </RadzenColumn>
+
+            <RadzenColumn Size="12" SizeMD="4" Class="rz-text-align-right">
+                <RadzenCard Variant="Variant.Flat" Class="rz-background-color-success-lighter" Style="display: inline-block; padding: 1rem 2rem;">
+                    <RadzenText TextStyle="TextStyle.Overline" Class="rz-color-success-dark" Style="margin: 0;">Price per Hour</RadzenText>
+                    <RadzenText TextStyle="TextStyle.H4" Class="rz-color-success-dark" Style="margin: 0; font-weight: bold;">
+                        @resource.PricePerHour.ToString("C", CultureInfo.GetCultureInfo("cs-CZ"))
+                    </RadzenText>
+                </RadzenCard>
+            </RadzenColumn>
+
         </RadzenRow>
     </RadzenCard>
 
-    <RadzenCard>
-        <RadzenText TextStyle="TextStyle.H5" Class="rz-mb-4">Availability</RadzenText>
+    <RadzenCard Style="border-radius: 16px;">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem" Class="rz-mb-4">
+            <RadzenIcon Icon="calendar_month" />
+            <RadzenText TextStyle="TextStyle.H5" Style="margin: 0;">Availability Calendar</RadzenText>
+        </RadzenStack>
 
         <RadzenScheduler @ref=@scheduler
                          SlotRender="@OnSlotRender"
-                         Style="height: 768px;"
+                         Style="height: 700px;"
                          TItem="ReservationDTO"
                          Data="@reservations"
                          StartProperty="Start"
@@ -174,7 +196,11 @@ else
             await JSRuntime.InvokeVoidAsync("console.log", "Result from request ", result);
             if (result.IsSuccess)
             {
-                reservations = result.Data;
+                reservations = result.Data.Select(r => r with
+                {
+                    Start = r.Start.ToLocalTime(),
+                    End = r.End.ToLocalTime()
+                }).ToList();
             }
         }
     }
@@ -199,16 +225,20 @@ else
     async Task OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<ReservationDTO> args)
     {
         await DialogService.OpenAsync<ReservationDetailDialog>("Reservation Details",
-             new Dictionary<string, object> { { "Reservation", args.Data } });
+             new Dictionary<string, object>
+             {
+                 { "Reservation", args.Data },
+                 { "CurrentUserId", UserId },
+                 { "IsResourceOwner", isOwner }
+             });
+
+        await scheduler.Reload();
     }
 
     void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<ReservationDTO> args)
     {
-        if (args.Data.Status == "Cancelled")
-        {
-            args.Attributes["style"] = "background: red";
-        }
-        else if (args.Data.UserId == UserId) 
+        
+        if (args.Data.UserId == UserId) 
         {
             args.Attributes["style"] = "background: #009688"; 
         }

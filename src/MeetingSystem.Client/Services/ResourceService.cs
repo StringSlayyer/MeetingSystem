@@ -160,5 +160,26 @@ namespace MeetingSystem.Client.Services
                 return Result.Failure<string>(Error.Failure("Client.Resource.Update", $"Network error: {ex.Message}"));
             }
         }
+
+        public async Task<Result> DeleteResourceAsync(Guid resourceId)
+        {
+            try
+            {
+                var url = $"api/Resource/delete?resourceId={resourceId}";
+
+                var response = await _http.DeleteAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<string>("Client.Resources.Delete");
+                }
+
+                return Result.Success();
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure(Error.Failure("Client.Resources.Delete", $"Network error: {ex.Message}"));
+            }
+        }
     }
 }

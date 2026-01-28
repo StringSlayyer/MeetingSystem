@@ -6,21 +6,25 @@
 @using MeetingSystem.Client.Extensions
 
 @inject ICompanyService CompanyService
-@inject AuthenticationStateProvider AuthStateProvider 
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
 
 @if (!isLoaded)
 {
-    <RadzenText Text="Loading..." />
+    <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
 }
 else
 {
-    @if (isOwner)
-    {
-        <RadzenStack>
-            <RadzenButton Text="Edit Company" Icon="edit" Click="@EditCompany"/>
-        </RadzenStack>
-    }
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Class="rz-mb-4" AlignItems="AlignItems.Center">
+        <RadzenButton Icon="arrow_back" Text="Back" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@GoBack" />
+
+        @if (isOwner)
+        {
+            <RadzenButton Text="Edit Company" Icon="edit" ButtonStyle="ButtonStyle.Warning" Click="@EditCompany" />
+        }
+    </RadzenStack>
+
     <RadzenCard Variant="Variant.Outlined" Style="border-radius:16px;">
         @{
             bool hasImage = !string.IsNullOrEmpty(data.ImageUrl);
@@ -30,94 +34,95 @@ else
 
         <RadzenCard Variant="Variant.Flat" Class="rz-mb-4 rz-mt-0"
                     Style="@($"height: 200px; background-size: cover; background-position: center; background-image: url('{bgUrl}'); background-color: {bgColor}; display: flex; align-items: center; justify-content: center;")">
-
             @if (!hasImage)
             {
                 <RadzenIcon Icon="domain" Style="font-size: 80px; color: rgba(255,255,255,0.5);" />
             }
-
         </RadzenCard>
-        <RadzenStack>
 
-            <RadzenText TextStyle="TextStyle.H5" Text="@data.Name" Style="font-weight: bold;" />
-            
-            <RadzenRow>
-                <RadzenRow>
-                    <RadzenIcon Icon="location_on"/>
-                    <RadzenText>@data.Street @data.Number, @data.City, @data.State</RadzenText>
-                </RadzenRow>
-                <RadzenRow>
-                    <RadzenIcon Icon="star" />
-                    <RadzenText>@data.Rating</RadzenText>
-                </RadzenRow>
-            </RadzenRow>
-            
-            <RadzenText Text="@data.Description" />
+        <RadzenStack>
+            <RadzenText TextStyle="TextStyle.H4" Text="@data.Name" Style="font-weight: bold; margin: 0;" />
+
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Wrap="FlexWrap.Wrap">
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                    <RadzenIcon Icon="location_on" Style="color: var(--rz-text-secondary-color);" />
+                    <RadzenText TextStyle="TextStyle.Body1">@data.Street @data.Number, @data.City, @data.State</RadzenText>
+                </RadzenStack>
+
+                @if (data.Rating > 0)
+                {
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                        <RadzenIcon Icon="star" Style="color: orange;" />
+                        <RadzenText TextStyle="TextStyle.Body1">@data.Rating.ToString("0.0") / 5.0</RadzenText>
+                    </RadzenStack>
+                }
+            </RadzenStack>
+
+            <RadzenText Text="@data.Description" Class="rz-mt-2" />
         </RadzenStack>
     </RadzenCard>
 
-    <RadzenStack class="rz-mt-12">
-        <RadzenRow JustifyContent="JustifyContent.SpaceBetween">
-            <RadzenText Text="Available Resources" />
+    <RadzenStack class="rz-mt-8">
+        <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+            <RadzenText TextStyle="TextStyle.H5" Text="Available Resources" Style="margin: 0;" />
             @if (isOwner)
             {
-                <RadzenButton Text="Add Resource" Icon="add" Click="@AddResource"/>                    
+                <RadzenButton Text="Add Resource" Icon="add" ButtonStyle="ButtonStyle.Success" Click="@AddResource" />
             }
         </RadzenRow>
-        @if (data.Resources.Count > 0)
-        {
-            foreach (var resource in data.Resources)
+
+        <RadzenRow Class="rz-mt-2">
+            @if (data.Resources.Count > 0)
             {
-                <RadzenCard @onclick="@(() => OpenResource(resource.Id))">
-                    <RadzenText Text="@resource.Name"  />
-                    <RadzenText Text="@resource.Description" />
-                    <RadzenText>Capacity @resource.Capacity</RadzenText>
-                </RadzenCard>
+                @foreach (var resource in data.Resources)
+                {
+                    <RadzenColumn Size="12" SizeMD="6" SizeLG="4">
+                        <RadzenCard Style="cursor: pointer; height: 100%;" Class="rz-shadow-3 hover-effect" @onclick="@(() => OpenResource(resource.Id))">
+                            <RadzenStack JustifyContent="JustifyContent.SpaceBetween" Style="height: 100%;">
+                                <RadzenStack>
+                                    <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+                                        <RadzenText TextStyle="TextStyle.H6" Style="margin: 0;">@resource.Name</RadzenText>
+                                        <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"{resource.Capacity} ppl")" />
+                                    </RadzenRow>
+                                    <RadzenText TextStyle="TextStyle.Body2" Class="rz-color-gray-dark">@resource.Description</RadzenText>
+                                </RadzenStack>
+                                <RadzenButton Text="View Calendar" ButtonStyle="ButtonStyle.Primary" Variant="Variant.Outlined" Size="ButtonSize.Small" Style="width: 100%; margin-top: 10px;" />
+                            </RadzenStack>
+                        </RadzenCard>
+                    </RadzenColumn>
+                }
             }
-        }
-        else
-        {
-            <RadzenText Text="No available resources" />
-        }
+            else
+            {
+                <RadzenColumn Size="12">
+                    <RadzenCard Variant="Variant.Flat" Class="rz-background-color-info-lighter rz-p-4" Style="text-align: center;">
+                        <RadzenText TextStyle="TextStyle.Body1">No resources have been added yet.</RadzenText>
+                    </RadzenCard>
+                </RadzenColumn>
+            }
+        </RadzenRow>
     </RadzenStack>
-    <style>
-        .image-container {
-            height: 200px;
-            background-image: url( @GetImageUrl(data) );
-            background-repeat: no-repeat;
-            background-size: cover;
-            background-position: center;
-        }
-
-    </style>
-
 }
 
-
 @code {
-    [Parameter]
-    public string? Id { get; set; }
+    [Parameter] public string? Id { get; set; }
 
     public bool isLoaded = false;
     public bool isOwner = false;
-    public string errorMessage = "";
     private SingleCompanyDTO? data;
+
     protected override async Task OnInitializedAsync()
     {
         isLoaded = false;
         var response = await CompanyService.GetCompanyByIdAsync(Id);
 
-
-
         if (response.IsSuccess)
         {
             data = response.Data;
-            Console.WriteLine(data);
         }
         else
         {
-            errorMessage = response.Error.Description;
-            isLoaded = true;
+            Nav.NavigateTo("/companies"); 
             return;
         }
 
@@ -128,7 +133,6 @@ else
         if (user.Identity.IsAuthenticated)
         {
             var currentUserId = user.GetUserId();
-
             isOwner = (currentUserId == data.Manager.ManagerId);
         }
 
@@ -138,25 +142,16 @@ else
     string GetRandomColor(string name)
     {
         var colors = new[] { "#009688", "#2196f3", "#9c27b0", "#ff5722", "#607d8b" };
-        var index = Math.Abs(name.GetHashCode()) % colors.Length;
-        return colors[index];
+        return colors[Math.Abs(name.GetHashCode()) % colors.Length];
     }
 
-    string GetImageUrl(SingleCompanyDTO c) =>
-      string.IsNullOrEmpty(c.ImageUrl) ? "none" : $"http://localhost:8080/api/files/{c.ImageUrl}";
 
-    public async void AddResource()
+    async Task GoBack()
     {
-        Nav.NavigateTo($"/companies/{data.Id}/resources/add");
+        await JSRuntime.InvokeVoidAsync("history.back");
     }
 
-    public async void OpenResource(Guid resourceId)
-    {
-        Nav.NavigateTo($"/resources/{resourceId}");
-    }
-
-    public async void EditCompany()
-    {
-        Nav.NavigateTo($"/companies/{data.Id}/edit");
-    }
+    void AddResource() => Nav.NavigateTo($"/companies/{data.Id}/resources/add");
+    void OpenResource(Guid resourceId) => Nav.NavigateTo($"/resources/{resourceId}");
+    void EditCompany() => Nav.NavigateTo($"/companies/{data.Id}/edit");
 }

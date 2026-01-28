@@ -17,7 +17,7 @@ namespace MeetingSystem.Domain.Companies
         public Guid ManagerId { get; private set; }
         public User Manager { get; private set; }
         public Address Address { get; private set; }
-
+        public bool IsDeleted { get; private set; } = false;
         public double Rating { get; private set; }
         public int BookingCount { get; private set; }
 
@@ -69,6 +69,11 @@ namespace MeetingSystem.Domain.Companies
             {
                 ImageUrl = imageUrl;
             }
+        }
+
+        public void SoftDelete()
+        {
+            IsDeleted = true;
         }
     }
 }
