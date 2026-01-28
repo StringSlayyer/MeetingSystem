@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Domain.Resources;
+﻿using MeetingSystem.Domain.Reservations.Events;
+using MeetingSystem.Domain.Resources;
 using SharedKernel;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,8 @@ namespace MeetingSystem.Domain.Reservations
             TimeSlot = timeSlot;
             Note = note;
             Status = ReservationStatus.Pending;
+
+            Raise(new ReservationCreatedDomainEvent(Id, ResourceId));
         }
 
         public void Confirm()

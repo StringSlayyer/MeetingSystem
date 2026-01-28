@@ -75,5 +75,10 @@ namespace MeetingSystem.Domain.Companies
         {
             IsDeleted = true;
         }
+
+        public void IncrementBookingCount()
+        {
+            BookingCount++;
+        }
     }
 }

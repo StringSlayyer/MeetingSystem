@@ -1,0 +1,106 @@
+﻿@page "/reservations"
+@using MeetingSystem.Client.Abstractions
+@using MeetingSystem.Contracts.Reservations
+@using SharedKernel
+@inject IReservationService ReservationService
+@inject NotificationService NotificationService
+@inject DialogService DialogService
+
+<RadzenStack>
+    <RadzenText TextStyle="TextStyle.H4">My Reservations</RadzenText>
+    <RadzenText TextStyle="TextStyle.Body1">Manage your upcoming bookings.</RadzenText>
+</RadzenStack>
+
+@if (isLoading)
+{
+    <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+}
+else if (reservations == null || !reservations.Any())
+{
+    <RadzenAlert Severity="AlertSeverity.Info" Variant="Variant.Flat" Shade="Shade.Lighter">
+        You have no upcoming reservations.
+    </RadzenAlert>
+}
+else
+{
+    <RadzenCard Style="border-radius: 15px; margin-top: 20px;">
+        <RadzenDataGrid Data="@reservations" TItem="ReservationDTO" AllowPaging="true" PageSize="10" AllowSorting="true">
+            <Columns>
+                <RadzenDataGridColumn TItem="ReservationDTO" Property="ResourceName" Title="Resource">
+                    <Template Context="data">
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" AlignItems="AlignItems.Center">
+                            <RadzenIcon Icon="meeting_room" IconStyle="IconStyle.Dark" />
+                            <RadzenText TextStyle="TextStyle.Subtitle2" Class="mb-0">@data.ResourceName</RadzenText>
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ReservationDTO" Property="Start" Title="Date" Sortable="true">
+                    <Template Context="data">
+                        @data.Start.ToString("MMM dd, yyyy")
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ReservationDTO" Title="Time" Sortable="false">
+                    <Template Context="data">
+                        @data.Start.ToShortTimeString() - @data.End.ToShortTimeString()
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ReservationDTO" Title="Actions" TextAlign="TextAlign.Center" Width="100px">
+                    <Template Context="data">
+                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Small"
+                                      Click="@(args => ConfirmCancel(data))"
+                                      ToolTip="Cancel Reservation" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenCard>
+}
+
+@code {
+    private List<ReservationDTO> reservations = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        var result = await ReservationService.GetMyReservationsAsync(null, null);
+
+        if (result.IsSuccess)
+        {
+            reservations = result.Data;
+        }
+        else
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
+        }
+        isLoading = false;
+    }
+
+    private async Task ConfirmCancel(ReservationDTO reservation)
+    {
+        var confirm = await DialogService.Confirm("Are you sure you want to cancel this reservation?", "Cancel Reservation",
+            new ConfirmOptions() { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (confirm == true)
+        {
+            var result = await ReservationService.CancelReservationAsync(reservation.Id);
+            if (result.IsSuccess)
+            {
+                NotificationService.Notify(NotificationSeverity.Success, "Success", "Reservation cancelled.");
+                await LoadData(); 
+            }
+            else
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
+            }
+        }
+    }
+}

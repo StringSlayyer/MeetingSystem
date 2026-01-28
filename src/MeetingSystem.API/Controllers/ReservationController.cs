@@ -3,6 +3,7 @@ using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Reservations.Cancel;
 using MeetingSystem.Application.Reservations.Create;
 using MeetingSystem.Application.Reservations.GetByResource;
+using MeetingSystem.Application.Reservations.GetByUser;
 using MeetingSystem.Contracts.Reservations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -57,6 +58,24 @@ namespace MeetingSystem.API.Controllers
             var result = await _dispatcher.Send(command, cancellationToken);
 
             if (result.IsSuccess) return Ok();
+
+            return BadRequest(result.Error);
+        }
+
+        [HttpGet("mine")]
+        public async Task<IActionResult> GetMyReservationsAsync(
+            [FromQuery] DateTime? start,
+            [FromQuery] DateTime? end,
+            CancellationToken cancellationToken)
+        {
+            var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
+            if (userId == Guid.Empty) return Unauthorized();
+
+            var query = new GetReservationsByUserQuery(userId, start, end);
+
+            var result = await _dispatcher.Query(query, cancellationToken);
+
+            if (result.IsSuccess) return Ok(result.Data);
 
             return BadRequest(result.Error);
         }

@@ -77,5 +77,29 @@ namespace MeetingSystem.Client.Services
                 return Result.Failure<List<ReservationDTO>>(Error.Failure("Client.Reservation.GetByResource", $"Network error: {ex.Message}"));
             }
         }
+
+        public async Task<Result<List<ReservationDTO>>> GetMyReservationsAsync(DateTime? start, DateTime? end)
+        {
+            try
+            {
+                var queryString = new StringBuilder();
+                if (start.HasValue) queryString.Append("?start=").Append(start.Value.ToString("s"));
+                if (end.HasValue) queryString.Append(start.HasValue ? "&" : "?").Append("end=").Append(end.Value.ToString("s"));
+
+                var response = await _http.GetAsync($"api/Reservation/mine{queryString}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.ToFailureResultAsync<List<ReservationDTO>>("Client.Reservation.GetMine");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<List<ReservationDTO>>();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return Result.Failure<List<ReservationDTO>>(Error.Failure("Client.Reservation.GetMine", ex.Message));
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@
 
     <RadzenRow JustifyContent="JustifyContent.SpaceBetween" class="w-80 m-auto">
 <RadzenStack >
-<RadzenText TextStyle="TextStyle.H4">Hello test</RadzenText>
+<RadzenText TextStyle="TextStyle.H4">Hello @data.Name</RadzenText>
 <RadzenText TextStyle="TextStyle.Body1">Welcome back to your reservation hub.</RadzenText>
 </RadzenStack>
 <RadzenStack>
@@ -25,35 +25,30 @@
     </RadzenRow>
 <RadzenRow class="w-100" JustifyContent="JustifyContent.SpaceBetween" RowGap="1rem">
 
-        <RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 30% !important; border-radius: 15px; background-color: #FEFCE8;" onclick="@RedirectToCompanies">
-    <RadzenStack class="rz-ml-4">
-            <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #FEF9C3">
-                <RadzenIcon Icon="apartment" IconStyle="IconStyle.Dark" />
-            </RadzenCard>
-        <RadzenText TextStyle="TextStyle.H6">Browse Companies</RadzenText>
-        <RadzenText TextStyle="TextStyle.Body1">Explore resources and make bookings</RadzenText>
-    </RadzenStack>
-</RadzenCard>
+        <RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 48% !important; border-radius: 15px; background-color: #FEFCE8;" onclick="@RedirectToCompanies">
+            <RadzenStack class="rz-ml-4">
+                    <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #FEF9C3">
+                        <RadzenIcon Icon="apartment" IconStyle="IconStyle.Dark" />
+                    </RadzenCard>
+                <RadzenText TextStyle="TextStyle.H6">Browse Companies</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">Explore resources and make bookings</RadzenText>
+            </RadzenStack>
+        </RadzenCard>
 
-<RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 30% !important; border-radius: 15px; background-color: #EFF6FF;">
-    <RadzenStack class="rz-ml-4">
-            <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #DBEAFE;">
-                <RadzenIcon Icon="calendar_today" IconStyle="IconStyle.Dark" />
-            </RadzenCard>
-        <RadzenText TextStyle="TextStyle.H6">@data.ReservationCount Upcoming</RadzenText>
-        <RadzenText TextStyle="TextStyle.Body1">You have @data.ReservationCount active reservations.</RadzenText>
-    </RadzenStack>
-</RadzenCard>
+        <RadzenCard class="rz-w-auto rz-py-6 rz-my-4"
+                    Variant="Variant.Outlined"
+                    Style="width: 48% !important; border-radius: 15px; background-color: #EFF6FF; cursor: pointer;"
+                    @onclick="@(() => Nav.NavigateTo("/reservations"))">
+            <RadzenStack class="rz-ml-4">
+                <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #DBEAFE;">
+                    <RadzenIcon Icon="calendar_today" IconStyle="IconStyle.Dark" />
+                </RadzenCard>
+                <RadzenText TextStyle="TextStyle.H6">@data.ReservationCount Upcoming</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1">You have @data.ReservationCount active reservations.</RadzenText>
+            </RadzenStack>
+        </RadzenCard>
 
-<RadzenCard class="rz-w-auto rz-py-6 rz-my-4" Variant="Variant.Outlined" Style="width: 30% !important; border-radius: 15px; background-color: #FAF5FF;">
-    <RadzenStack class="rz-ml-4">
-            <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #F3E8FF;">
-                <RadzenIcon Icon="star" IconStyle="IconStyle.Dark" />
-            </RadzenCard>
-        <RadzenText TextStyle="TextStyle.H6">Favorites</RadzenText>
-        <RadzenText TextStyle="TextStyle.Body1">Quick access to your top spots.</RadzenText>
-    </RadzenStack>
-</RadzenCard>
+
 
 </RadzenRow>
 
@@ -68,13 +63,12 @@
                     <RadzenIcon Icon="calendar_today" IconStyle="IconStyle.Dark" />
                 </RadzenCard>
                 <RadzenStack>
-                    <RadzenText Text="@res.ResourceName" TextStyle="TextStyle.Subtitle1" />
-                    <RadzenText Text="@res.ResourceName" TextStyle="TextStyle.Subtitle2"/>
+                    <RadzenText Text="@res.ResourceName" TextStyle="TextStyle.Subtitle1"/>
                 </RadzenStack>
 
                 <RadzenStack>
-                    <RadzenText Text="@res.Start.Date.ToString()" TextStyle="TextStyle.Subtitle1" />
-                    <RadzenText TextStyle="TextStyle.Subtitle2" >@res.Start.Hour : @res.Start.Minute - @res.End.Hour : @res.End.Minute</RadzenText>
+                    <RadzenText Text="@res.Start.ToString("MMMM dd, yyyy")" TextStyle="TextStyle.Subtitle1" />
+                    <RadzenText TextStyle="TextStyle.Subtitle2" >@res.Start.ToShortTimeString() - @res.End.ToShortTimeString()</RadzenText>
                 </RadzenStack>
 
                 <RadzenStack>

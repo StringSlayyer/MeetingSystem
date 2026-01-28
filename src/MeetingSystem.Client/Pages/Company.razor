@@ -148,7 +148,7 @@ else
 
     async Task GoBack()
     {
-        await JSRuntime.InvokeVoidAsync("history.back");
+        Nav.NavigateTo("/companies");
     }
 
     void AddResource() => Nav.NavigateTo($"/companies/{data.Id}/resources/add");

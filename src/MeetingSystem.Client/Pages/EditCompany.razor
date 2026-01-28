@@ -8,8 +8,13 @@
 @inject NotificationService NotificationService
 @inject DialogService DialogService 
 
+<NavigationLock ConfirmExternalNavigation="@isDirty" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
+
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 800px;">
-    <RadzenText TextStyle="TextStyle.H3" Class="rz-mb-6">Edit Company</RadzenText>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Class="rz-mb-6">
+        <RadzenButton Icon="arrow_back" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Click="@OnBackClick" />
+        <RadzenText TextStyle="TextStyle.H3" Style="margin: 0;">Edit Company</RadzenText>
+    </RadzenStack>
 
     @if (isLoading)
     {
@@ -26,7 +31,7 @@
                     <RadzenColumn Size="12" SizeMD="6">
                         <RadzenFormField Text="Company Name" Style="width: 100%;">
                             <ChildContent>
-                                <RadzenTextBox Name="Name" @bind-Value="@inputModel.Name" />
+                                <RadzenTextBox Name="Name" @bind-Value="@inputModel.Name" Change="@(args => { isDirty = true; })" />
                             </ChildContent>
                             <Helper>
                                 <RadzenRequiredValidator Component="Name" Text="Company Name is required" />
@@ -49,8 +54,11 @@
 
                 <RadzenFormField Text="Description" Style="width: 100%;">
                     <ChildContent>
-                        <RadzenTextArea Name="Description" @bind-Value="@inputModel.Description" Rows="3" />
+                        <RadzenTextArea Name="Description" @bind-Value="@inputModel.Description" Rows="3" Change="@(args => { isDirty = true; })" />
                     </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="Description" Text="Description is required" />
+                    </Helper>
                 </RadzenFormField>
 
                 <RadzenText TextStyle="TextStyle.H6" Class="rz-mt-4">Address Details</RadzenText>
@@ -59,7 +67,7 @@
                     <RadzenColumn Size="12" SizeMD="8">
                         <RadzenFormField Text="Street" Style="width: 100%;">
                             <ChildContent>
-                                <RadzenTextBox Name="Street" @bind-Value="@inputModel.Street" />
+                                <RadzenTextBox Name="Street" @bind-Value="@inputModel.Street" Change="@(args => { isDirty = true; })" />
                             </ChildContent>
                             <Helper>
                                 <RadzenRequiredValidator Component="Street" Text="Street is required" />
@@ -69,7 +77,7 @@
                     <RadzenColumn Size="12" SizeMD="4">
                         <RadzenFormField Text="Number" Style="width: 100%;">
                             <ChildContent>
-                                <RadzenTextBox Name="Number" @bind-Value="@inputModel.Number" />
+                                <RadzenTextBox Name="Number" @bind-Value="@inputModel.Number" Change="@(args => { isDirty = true; })"/>
                             </ChildContent>
                             <Helper>
                                 <RadzenRequiredValidator Component="Number" Text="Number is required" />
@@ -82,7 +90,7 @@
                     <RadzenColumn Size="12" SizeMD="6">
                         <RadzenFormField Text="City" Style="width: 100%;">
                             <ChildContent>
-                                <RadzenTextBox Name="City" @bind-Value="@inputModel.City" />
+                                <RadzenTextBox Name="City" @bind-Value="@inputModel.City" Change="@(args => { isDirty = true; })" />
                             </ChildContent>
                             <Helper>
                                 <RadzenRequiredValidator Component="City" Text="City is required" />
@@ -92,7 +100,7 @@
                     <RadzenColumn Size="12" SizeMD="6">
                         <RadzenFormField Text="State" Style="width: 100%;">
                             <ChildContent>
-                                <RadzenTextBox Name="State" @bind-Value="@inputModel.State" />
+                                <RadzenTextBox Name="State" @bind-Value="@inputModel.State" Change="@(args => { isDirty = true; })" />
                             </ChildContent>
                             <Helper>
                                 <RadzenRequiredValidator Component="State" Text="State is required" />
@@ -107,7 +115,6 @@
                     <RadzenImage Path="@currentImageUrl" Style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" />
                 }
 
-                @* --- BUTTONS SECTION --- *@
                 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" Class="rz-mt-4">
                      <RadzenButton ButtonType="ButtonType.Submit" Text="Save Changes" IsBusy="@isBusy" Icon="save" ButtonStyle="ButtonStyle.Primary" />
                      
@@ -119,7 +126,7 @@
     }
 </RadzenCard>
 
-@code {
+    @code {
     [Parameter] public string Id { get; set; } = string.Empty;
 
     CreateCompanyInputModel inputModel = new();
@@ -128,6 +135,7 @@
     bool isBusy = false;
     bool isLoading = true;
     string currentImageUrl = "";
+    bool isDirty = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -160,6 +168,7 @@
 
     void OnImageChange(UploadChangeEventArgs args)
     {
+        isDirty = true;
         if (args.Files.Any())
             selectedFile = args.Files.First();
         else
@@ -174,6 +183,7 @@
 
         if (result.IsSuccess)
         {
+            isDirty = false;
             NotificationService.Notify(NotificationSeverity.Success, "Success", "Company updated!");
             Nav.NavigateTo($"/companies/{Id}");
         }
@@ -204,6 +214,30 @@
                 NotificationService.Notify(NotificationSeverity.Error, "Cannot Delete", result.Error.Description);
             }
             isBusy = false;
+        }
+    }
+
+    async Task OnBackClick()
+    {
+        if (isDirty)
+        {
+            var result = await DialogService.Confirm("Discard unsaved changes?", "Unsaved Changes", new ConfirmOptions() { OkButtonText = "Discard", CancelButtonText = "Stay" });
+            if (result != true) return;
+        }
+        Nav.NavigateTo($"/companies/{Id}");
+    }
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        if (isDirty)
+        {
+            context.PreventNavigation();
+            var result = await DialogService.Confirm("You have unsaved changes. Discard them?", "Unsaved Changes", new ConfirmOptions() { OkButtonText = "Discard", CancelButtonText = "Stay" });
+            if (result == true)
+            {
+                isDirty = false;
+                Nav.NavigateTo(context.TargetLocation);
+            }
         }
     }
 }

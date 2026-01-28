@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MeetingSystem.Application.Extensions;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -26,18 +27,8 @@ namespace MeetingSystem.Application.Companies.Update
             RuleFor(x => x.State).NotEmpty().MaximumLength(50);
             RuleFor(x => x.Number).NotEmpty().MaximumLength(20);
 
-            RuleFor(x => x.Image)
-                .Must(BeAValidImage).WithMessage("Image must be a JPG or PNG and under 5MB.")
-                .When(x => x.Image != null);
+            RuleFor(x => x.Image).ValidImage();
         }
 
-        private bool BeAValidImage(IFormFile? file)
-        {
-            if (file is null) return true;
-            if (file.Length > 5 * 1024 * 1024) return false;
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
-            var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
-            return allowedExtensions.Contains(ext);
-        }
     }
 }
