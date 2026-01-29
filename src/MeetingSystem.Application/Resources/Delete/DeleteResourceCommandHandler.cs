@@ -2,6 +2,7 @@
 using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Domain.Reservations;
+using MeetingSystem.Domain.Resources;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 using System;
@@ -21,12 +22,12 @@ namespace MeetingSystem.Application.Resources.Delete
 
             if (resource is null)
             {
-                return Result.Failure(Error.NotFound("Resource.NotFound", "Resource not found"));
+                return Result.Failure(ResourceError.NotFound(command.ResourceId));
             }
 
             if (resource.Company?.ManagerId != command.UserId)
             {
-                return Result.Failure(Error.Failure("Resource.Unauthorized", "You do not own this resource"));
+                return Result.Failure(ResourceError.Unauthorized);
             }
 
             bool hasFutureReservations = await context.Reservations
@@ -35,9 +36,7 @@ namespace MeetingSystem.Application.Resources.Delete
 
             if (hasFutureReservations)
             {
-                return Result.Failure(Error.Conflict(
-                    "Resource.HasFutureBookings",
-                    "Cannot delete this resource because it has upcoming reservations. Cancel them first."));
+                return Result.Failure(ResourceError.HasFutureBookings);
             }
 
             

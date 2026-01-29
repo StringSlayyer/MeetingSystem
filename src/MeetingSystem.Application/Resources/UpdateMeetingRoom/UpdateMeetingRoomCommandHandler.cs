@@ -22,12 +22,12 @@ namespace MeetingSystem.Application.Resources.UpdateMeetingRoom
 
             if (resource is not MeetingRoom room)
             {
-                return Result.Failure<Guid>(Error.NotFound("Resource.NotFound", "Meeting room not found"));
+                return Result.Failure<Guid>(ResourceError.MeetingRoomNotFound);
             }
 
             if (room.Company?.ManagerId != command.UserId)
             {
-                return Result.Failure<Guid>(Error.Failure("Resource.Unauthorized", "You do not own this resource"));
+                return Result.Failure<Guid>(ResourceError.Unauthorized);
             }
 
             string? newImageUrl = null;

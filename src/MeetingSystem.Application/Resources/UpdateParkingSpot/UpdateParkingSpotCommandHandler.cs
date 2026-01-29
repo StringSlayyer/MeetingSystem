@@ -22,12 +22,12 @@ namespace MeetingSystem.Application.Resources.UpdateParkingSpot
 
             if (resource is not ParkingSpot spot)
             {
-                return Result.Failure<Guid>(Error.NotFound("Resource.NotFound", "Parking spot not found"));
+                return Result.Failure<Guid>(ResourceError.ParkingSpotNotFound);
             }
 
             if (spot.Company?.ManagerId != command.UserId)
             {
-                return Result.Failure<Guid>(Error.Failure("Resource.Unauthorized", "You do not own this resource"));
+                return Result.Failure<Guid>(ResourceError.Unauthorized);
             }
 
             string? newImageUrl = null;

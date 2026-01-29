@@ -1,6 +1,7 @@
 ﻿using MeetingSystem.Application.Abstractions.Data;
 using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
+using MeetingSystem.Domain.Companies;
 using MeetingSystem.Domain.Reservations;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
@@ -23,12 +24,12 @@ namespace MeetingSystem.Application.Companies.Delete
             
             if (company is null)
             {
-                return Result.Failure(Error.NotFound("Company.NotFound", "Company not found"));
+                return Result.Failure(CompanyError.CompanyNotFound(command.CompanyId));
             }
 
             if (company.ManagerId != command.UserId)
             {
-                return Result.Failure(Error.Failure("Company.Unauthorized", "You are not the manager of this company"));
+                return Result.Failure(CompanyError.Unauthorized);
             }
 
           
@@ -41,9 +42,7 @@ namespace MeetingSystem.Application.Companies.Delete
 
             if (hasFutureReservations)
             {
-                return Result.Failure(Error.Conflict(
-                    "Company.HasActiveBookings",
-                    "Cannot delete company. There are upcoming reservations for your resources."));
+                return Result.Failure(CompanyError.HasActiveBookings);
             }
 
           

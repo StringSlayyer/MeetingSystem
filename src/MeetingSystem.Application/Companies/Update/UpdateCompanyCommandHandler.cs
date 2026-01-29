@@ -11,7 +11,7 @@ using System.Text;
 
 namespace MeetingSystem.Application.Companies.Update
 {
-    public sealed class UpdateCompanyHandler(
+    public sealed class UpdateCompanyCommandHandler(
         IApplicationDbContext context, IFileStorageService fileStorageService)
         : ICommandHandler<UpdateCompanyCommand, Guid>
     {
@@ -22,12 +22,12 @@ namespace MeetingSystem.Application.Companies.Update
 
             if (company is null)
             {
-                return Result.Failure<Guid>(Error.NotFound("Company.NotFound", "Company not found"));
+                return Result.Failure<Guid>(CompanyError.CompanyNotFound(command.CompanyId));
             }
 
             if (company.ManagerId != command.ManagerId)
             {
-                return Result.Failure<Guid>(Error.Failure("Company.Unauthorized", "You are not the manager of this company."));
+                return Result.Failure<Guid>(CompanyError.Unauthorized);
             }
 
             string? newImageUrl = null;

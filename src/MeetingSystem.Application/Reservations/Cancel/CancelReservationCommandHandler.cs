@@ -21,7 +21,7 @@ namespace MeetingSystem.Application.Reservations.Cancel
 
             if (reservation is null)
             {
-                return Result.Failure(Error.NotFound("Reservation.NotFound", "Reservation not found"));
+                return Result.Failure(ReservationError.NotFound);
             }
 
 
@@ -30,17 +30,17 @@ namespace MeetingSystem.Application.Reservations.Cancel
 
             if (!isCreator && !isManager)
             {
-                return Result.Failure(Error.Failure("Reservation.Unauthorized", "You are not authorized to cancel this reservation."));
+                return Result.Failure(ReservationError.Unauthorized);
             }
 
             if (reservation.Status == ReservationStatus.Cancelled)
             {
-                return Result.Failure(Error.Conflict("Reservation.AlreadyCancelled", "This reservation is already cancelled."));
+                return Result.Failure(ReservationError.AlreadyCancelled);
             }
 
             if (reservation.TimeSlot.End < DateTime.UtcNow)
             {
-                return Result.Failure(Error.Failure("Reservation.Past", "Cannot cancel a reservation that has already ended."));
+                return Result.Failure(ReservationError.Past);
             }
 
             reservation.Cancel();

@@ -12,5 +12,17 @@ namespace MeetingSystem.Domain.Reservations
 
         public static Error WrongDates => Error.Conflict(
             "Reservation.WrongDates", "Start time cant be later than end time");
+
+        public static Error NotFound => Error.NotFound(
+            "Reservation.NotFound", "Reservation not found");
+
+        public static Error Unauthorized => Error.Failure(
+            "Reservation.Unauthorized", "You are not authorized to cancel this reservation.");
+
+        public static Error AlreadyCancelled => Error.Conflict(
+            "Reservation.AlreadyCancelled", "This reservation is already cancelled.");
+
+        public static Error Past => Error.Failure(
+            "Reservation.Past", "Cannot cancel a reservation that has already ended.");
     }
 }

@@ -32,7 +32,10 @@ namespace MeetingSystem.API.Controllers
             if (userId == null || userId == Guid.Empty) return Unauthorized();
             var command = new CreateCompanyCommand(userId, request.Name, request.Description, request.Image, request.Number, request.Street, request.City, request.State);
             var result = await _dispatcher.Send(command, cancellationToken);
-            return Ok(result);
+
+            if(result.IsSuccess) return Ok(result);
+
+            return BadRequest(result.Error);
         }
 
 
