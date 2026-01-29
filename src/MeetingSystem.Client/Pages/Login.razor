@@ -8,7 +8,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IJSRuntime JSRuntime
+@inject NotificationService NotificationService
 
 @attribute [AllowAnonymous]
 
@@ -76,15 +76,9 @@
 
         var response = await AuthService.LoginAsync(request);
 
-        await JSRuntime.InvokeVoidAsync("console.log", "Login request: ", request);
-
-
-
 
         if (response.IsSuccess)
         {
-            await JSRuntime.InvokeVoidAsync("console.log", "Login response: ", response);
-
             var customProvider = (CustomAuthStateProvider)AuthStateProvider;
 
             await customProvider.MarkUserAsAuthenticated(response.Data.Token);
@@ -94,6 +88,7 @@
         else
         {
             errorMessage = response.Error.Description;
+            NotificationService.Notify(NotificationSeverity.Error, "Error", errorMessage);
             isError = true;
         }
 
