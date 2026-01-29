@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Messaging;
+﻿using MeetingSystem.API.Extensions;
+using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Companies.CreateCompany;
 using MeetingSystem.Application.Companies.Delete;
@@ -44,9 +45,7 @@ namespace MeetingSystem.API.Controllers
         {
             var companies = await _dispatcher.Query(new GetCompaniesQuery(request.Page, request.PageSize, request.SearchTerm), cancellationToken);
 
-            if (companies.IsSuccess) return Ok(companies.Data);
-
-            return BadRequest(companies.Error);
+            return companies.ToActionResult();
 
         }
 
@@ -55,9 +54,7 @@ namespace MeetingSystem.API.Controllers
         {
             var company = await _dispatcher.Query(new GetCompanyByIdQuery(request.CompanyId), cancellationToken);
 
-            if (company.IsSuccess) return Ok(company.Data);
-
-            return BadRequest(company.Error);
+            return company.ToActionResult();
         }
 
         [HttpGet("getByUser")]
@@ -68,9 +65,7 @@ namespace MeetingSystem.API.Controllers
 
             var companies = await _dispatcher.Query(new GetCompaniesByUserQuery(id, request.Page, request.PageSize), cancellationToken);
 
-            if (companies.IsSuccess) return Ok(companies.Data);
-
-            return BadRequest(companies.Error);
+            return companies.ToActionResult();
         }
 
         [HttpPut("edit")]
@@ -93,22 +88,18 @@ namespace MeetingSystem.API.Controllers
 
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result.Data);
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
-        [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteCompanyAsync([FromQuery] Guid companyId, CancellationToken cancellationToken)
+        [HttpDelete("{companyId}")]
+        public async Task<IActionResult> DeleteCompanyAsync(Guid companyId, CancellationToken cancellationToken)
         {
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             if (userId == null || userId == Guid.Empty) return Unauthorized();
             var command = new DeleteCompanyCommand(userId, companyId);
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok();
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
     }
     public sealed record CreateCompanyRequest(string Name, string Description,

@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Messaging;
+﻿using MeetingSystem.API.Extensions;
+using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Dashboards.Get;
 using Microsoft.AspNetCore.Http;
@@ -26,8 +27,8 @@ namespace MeetingSystem.API.Controllers
             if (userId == Guid.Empty) return Unauthorized();
             var query = new GetUserDashboardQuery(userId);
             var result = await _dispatcher.Query(query, cancellationToken);
-            if (result.IsSuccess) return Ok(result);
-            return BadRequest(result.Error);
+
+            return result.ToActionResult();
         }
     }
 }

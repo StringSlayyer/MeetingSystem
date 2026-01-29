@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Messaging;
+﻿using MeetingSystem.API.Extensions;
+using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Users.Login;
 using MeetingSystem.Application.Users.Register;
 using MeetingSystem.Contracts.Users;
@@ -27,11 +28,8 @@ namespace MeetingSystem.API.Controllers
                 request.Password);
 
             var result = await _dispatcher.Send(command, cancellationToken);
-            if(result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result.Error);
+
+            return result.ToActionResult();
         }
 
         [HttpPost("login")]
@@ -42,11 +40,8 @@ namespace MeetingSystem.API.Controllers
                 request.Password);
 
             var result = await _dispatcher.Send(command, cancellationToken);
-            if (result.IsSuccess)
-            {
-                return Ok(result.Data);
-            }
-            return BadRequest(result.Error);
+            
+            return result.ToActionResult();
         }
 
     }

@@ -179,7 +179,7 @@ namespace MeetingSystem.Client.Services
         {
             try
             {
-                var url = $"api/Company/delete?companyId={companyId}";
+                var url = $"api/Company/{companyId}";
 
                 var response = await _http.DeleteAsync(url);
 

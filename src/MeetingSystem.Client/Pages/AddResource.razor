@@ -7,6 +7,7 @@
 @inject IResourceService ResourceService
 @inject NavigationManager Nav
 @inject DialogService DialogService
+@inject IJSRuntime JSRuntime
 
 <NavigationLock ConfirmExternalNavigation="@isDirty" OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 
@@ -178,7 +179,8 @@
 
         var result = await ResourceService.AddResourceAsync(inputModel, selectedFile);
 
-
+        Console.WriteLine(result);
+        await JSRuntime.InvokeVoidAsync("console.log", result);
         if (result.IsSuccess)
         {
             isDirty = false;

@@ -66,7 +66,7 @@ namespace MeetingSystem.Client.Services
                     return await response.ToFailureResultAsync<Guid>("Client.Resources.AddResource");
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<Result<Guid>>();
+                var result = await response.Content.ReadFromJsonAsync<Guid>();
                 return result;
 
             }catch(Exception ex)
@@ -91,7 +91,7 @@ namespace MeetingSystem.Client.Services
                     return await response.ToFailureResultAsync<ResourceDTO>("Client.Resource.GetById");
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<Result<ResourceDTO>>();
+                var result = await response.Content.ReadFromJsonAsync<ResourceDTO>();
 
                 return result;
             }
@@ -165,7 +165,7 @@ namespace MeetingSystem.Client.Services
         {
             try
             {
-                var url = $"api/Resource/delete?resourceId={resourceId}";
+                var url = $"api/Resource/{resourceId}";
 
                 var response = await _http.DeleteAsync(url);
 

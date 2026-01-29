@@ -41,7 +41,7 @@ namespace MeetingSystem.Client.Services
                     return await response.ToFailureResultAsync<Guid>("Client.Reservation.Create");
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<Result<Guid>>();
+                var result = await response.Content.ReadFromJsonAsync<Guid>();
 
                 return result;
             }
@@ -68,7 +68,7 @@ namespace MeetingSystem.Client.Services
                     return await response.ToFailureResultAsync<List<ReservationDTO>>("Client.Reservation.GetByResource");
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<Result<List<ReservationDTO>>>();
+                var result = await response.Content.ReadFromJsonAsync<List<ReservationDTO>>();
 
                 return result;
             }

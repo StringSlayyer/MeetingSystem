@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Messaging;
+﻿using MeetingSystem.API.Extensions;
+using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Companies.Delete;
 using MeetingSystem.Application.Resources.AddMeetingRoom;
@@ -36,9 +37,7 @@ namespace MeetingSystem.API.Controllers
             var command = new AddMeetingRoomCommand(userId, request.Name, request.CompanyId, request.Description, request.PricePerHour, request.Image, request.Capacity, request.Features);
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result);
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
         [HttpGet("getByCompany")]
@@ -46,9 +45,8 @@ namespace MeetingSystem.API.Controllers
         {
             var query = new GetResourcesByCompanyQuery(request.CompanyId);
             var result = await _dispatcher.Query(query, cancellationToken);
-            if (result.IsSuccess) return Ok(result);
 
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
         [HttpGet("getById")]
@@ -56,9 +54,8 @@ namespace MeetingSystem.API.Controllers
         {
             var query = new GetResourceByIdQuery(request.Id);
             var result = await _dispatcher.Query(query, cancellationToken);
-            if (result.IsSuccess) return Ok(result);
 
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
         [HttpPost("addParkingSpot")]
@@ -69,9 +66,7 @@ namespace MeetingSystem.API.Controllers
             var command = new AddParkingSpotCommand(userId, request.Name, request.CompanyId, request.Description, request.PricePerHour, request.Image, request.Capacity, request.IsCovered);
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result);
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
         [HttpPut("editMeetingRoom")]
@@ -95,22 +90,18 @@ namespace MeetingSystem.API.Controllers
             var command = new UpdateParkingSpotCommand(request.ResourceId, userId, request.Name, request.Description, request.PricePerHour, request.Image, request.IsCovered);
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result);
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
-        [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteCompanyAsync([FromQuery] Guid resourceId, CancellationToken cancellationToken)
+        [HttpDelete("{resourceId}")]
+        public async Task<IActionResult> DeleteCompanyAsync(Guid resourceId, CancellationToken cancellationToken)
         {
             var userId = _tokenService.GetUserIdFromClaimsPrincipal(User);
             if (userId == null || userId == Guid.Empty) return Unauthorized();
             var command = new DeleteResourceCommand(userId, resourceId);
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok();
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using MeetingSystem.Application.Abstractions.Messaging;
+﻿using MeetingSystem.API.Extensions;
+using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
 using MeetingSystem.Application.Reservations.Cancel;
 using MeetingSystem.Application.Reservations.Create;
@@ -31,9 +32,8 @@ namespace MeetingSystem.API.Controllers
             var command = new CreateReservationCommand(request.ResourceId, userId, request.StartTime, request.EndTime, request.Note, request.AttendeeEmails);
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result);
+            return result.ToActionResult();
 
-            return BadRequest(result.Error);
         }
 
         [HttpGet("getByResource")]
@@ -42,9 +42,8 @@ namespace MeetingSystem.API.Controllers
             var query = new GetReservationsByResourceQuery(request.ResourceId, request.Start, request.End);
             var result = await _dispatcher.Query(query, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result);
+            return result.ToActionResult();
 
-            return BadRequest(result.Error);
         }
 
         [HttpDelete("{reservationId}/cancel")]
@@ -57,9 +56,7 @@ namespace MeetingSystem.API.Controllers
 
             var result = await _dispatcher.Send(command, cancellationToken);
 
-            if (result.IsSuccess) return Ok();
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
 
         [HttpGet("mine")]
@@ -75,12 +72,8 @@ namespace MeetingSystem.API.Controllers
 
             var result = await _dispatcher.Query(query, cancellationToken);
 
-            if (result.IsSuccess) return Ok(result.Data);
-
-            return BadRequest(result.Error);
+            return result.ToActionResult();
         }
     }
-
-  
 
 }
