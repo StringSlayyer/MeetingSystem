@@ -21,8 +21,8 @@ namespace MeetingSystem.Application.Reservations.Create
             if (resource is null)
                 return Result.Failure<Guid>(ResourceError.NotFound(command.ResourceId));
 
-            var newStart = command.StartTime.ToUniversalTime();
-            var newEnd = command.EndTime.ToUniversalTime();
+            var newStart = command.StartTime;
+            var newEnd = command.EndTime;
 
             bool isOverlapping = await context.Reservations
                 .AnyAsync(r =>

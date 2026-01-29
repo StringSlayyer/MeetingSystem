@@ -115,7 +115,7 @@ namespace MeetingSystem.API.Controllers
     }
 
     public sealed record AddMeetingRoomRequest(string Name, Guid CompanyId,
-        string Description, decimal PricePerHour, IFormFile? Image, int Capacity, List<string> Features);
+        string Description, decimal PricePerHour, IFormFile? Image, int Capacity, List<string>? Features);
     public sealed record AddParkingSpotRequest(string Name, Guid CompanyId,
        string Description, decimal PricePerHour, IFormFile? Image, int Capacity, bool IsCovered);
 

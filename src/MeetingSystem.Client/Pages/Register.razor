@@ -8,6 +8,8 @@
 @inject IAuthService AuthService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider 
+@inject NotificationService NotificationService
+
 
 @attribute [AllowAnonymous]
 
@@ -109,6 +111,7 @@
         else
         {
             errorMessage = response.Error.Description;
+            NotificationService.Notify(NotificationSeverity.Error, "Error", errorMessage);
         }
 
         isBusy = false;

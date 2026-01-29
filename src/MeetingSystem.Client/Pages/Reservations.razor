@@ -5,6 +5,7 @@
 @inject IReservationService ReservationService
 @inject NotificationService NotificationService
 @inject DialogService DialogService
+@inject NavigationManager Nav
 
 <RadzenStack>
     <RadzenText TextStyle="TextStyle.H4">My Reservations</RadzenText>
@@ -24,7 +25,7 @@ else if (reservations == null || !reservations.Any())
 else
 {
     <RadzenCard Style="border-radius: 15px; margin-top: 20px;">
-        <RadzenDataGrid Data="@reservations" TItem="ReservationDTO" AllowPaging="true" PageSize="10" AllowSorting="true">
+        <RadzenDataGrid Data="@reservations" TItem="ReservationDTO" AllowPaging="true" PageSize="10" AllowSorting="true" RowClick="@OnRowClick">
             <Columns>
                 <RadzenDataGridColumn TItem="ReservationDTO" Property="ResourceName" Title="Resource">
                     <Template Context="data">
@@ -37,13 +38,13 @@ else
 
                 <RadzenDataGridColumn TItem="ReservationDTO" Property="Start" Title="Date" Sortable="true">
                     <Template Context="data">
-                        @data.Start.ToString("MMM dd, yyyy")
+                        @data.Start.ToLocalTime().ToString("dd. MMM yyyy")
                     </Template>
                 </RadzenDataGridColumn>
 
                 <RadzenDataGridColumn TItem="ReservationDTO" Title="Time" Sortable="false">
                     <Template Context="data">
-                        @data.Start.ToShortTimeString() - @data.End.ToShortTimeString()
+                        @data.Start.ToLocalTime().ToShortTimeString() - @data.End.ToLocalTime().ToShortTimeString()
                     </Template>
                 </RadzenDataGridColumn>
 
@@ -102,5 +103,10 @@ else
                 NotificationService.Notify(NotificationSeverity.Error, "Error", result.Error.Description);
             }
         }
+    }
+
+    void OnRowClick(DataGridRowMouseEventArgs<ReservationDTO> args)
+    {
+        Nav.NavigateTo($"/resources/{args.Data.ResourceId}");
     }
 }

@@ -278,6 +278,8 @@
         {
             var result = await DialogService.Confirm("Discard unsaved changes?", "Unsaved Changes", new ConfirmOptions() { OkButtonText = "Discard", CancelButtonText = "Stay" });
             if (result != true) return;
+
+            isDirty = false;
         }
         Nav.NavigateTo($"/resources/{Id}");
     }

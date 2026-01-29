@@ -60,8 +60,8 @@
 
         CreateReservationRequest request = new(
             ResourceId,
-            inputModel.Start,
-            inputModel.End,
+            inputModel.Start.ToUniversalTime(),
+            inputModel.End.ToUniversalTime(),
             inputModel.Note,
             null
         );

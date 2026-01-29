@@ -1,6 +1,7 @@
 ﻿using MeetingSystem.Application.Abstractions.Data;
 using MeetingSystem.Application.Abstractions.Messaging;
 using MeetingSystem.Application.Abstractions.Services;
+using MeetingSystem.Domain.Reservations;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 using System;
@@ -34,7 +35,8 @@ namespace MeetingSystem.Application.Companies.Delete
             bool hasFutureReservations = await context.Reservations
                 .AnyAsync(r =>
                     r.Resource.CompanyId == company.Id &&
-                    r.TimeSlot.End > DateTime.UtcNow,
+                    r.TimeSlot.End > DateTime.UtcNow &&
+                    r.Status != ReservationStatus.Cancelled,
                     cancellationToken);
 
             if (hasFutureReservations)

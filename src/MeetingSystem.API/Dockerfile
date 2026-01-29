@@ -8,7 +8,6 @@ WORKDIR /app
 RUN mkdir -p /app/uploads && chmod -R 777 /app/uploads
 
 EXPOSE 8080
-EXPOSE 8081
 
 
 # This stage is used to build the service project

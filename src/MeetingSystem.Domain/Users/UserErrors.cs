@@ -8,7 +8,7 @@ namespace MeetingSystem.Domain.Users
     public static class UserErrors
     {
         public static Error EmailNotUnique = Error.Conflict(
-            "Users.EmailNotUnique", "The provided email was not unique");
+            "Users.EmailNotUnique", "User with this email already exists");
         public static Error NotFoundByEmail = Error.NotFound(
             "Users.NotFoundByEmail", "No user found with the provided email");
 

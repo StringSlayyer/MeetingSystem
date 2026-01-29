@@ -57,7 +57,7 @@
     <RadzenStack>
         @foreach (var res in data.Reservations)
         {
-        <RadzenCard>
+        <RadzenCard @onclick="@(() => Nav.NavigateTo($"/resources/{res.ResourceId}"))">
             <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
                 <RadzenCard Variant="Variant.Flat" class="rz-w-min-content" Style="border-radius: 15px; background-color: #DBEAFE;">
                     <RadzenIcon Icon="calendar_today" IconStyle="IconStyle.Dark" />
@@ -67,8 +67,8 @@
                 </RadzenStack>
 
                 <RadzenStack>
-                    <RadzenText Text="@res.Start.ToString("MMMM dd, yyyy")" TextStyle="TextStyle.Subtitle1" />
-                    <RadzenText TextStyle="TextStyle.Subtitle2" >@res.Start.ToShortTimeString() - @res.End.ToShortTimeString()</RadzenText>
+                    <RadzenText Text="@res.Start.ToLocalTime().ToString("dd. MMMM yyyy")" TextStyle="TextStyle.Subtitle1" />
+                    <RadzenText TextStyle="TextStyle.Subtitle2" >@res.Start.ToLocalTime().ToShortTimeString() - @res.End.ToLocalTime().ToShortTimeString()</RadzenText>
                 </RadzenStack>
 
                 <RadzenStack>

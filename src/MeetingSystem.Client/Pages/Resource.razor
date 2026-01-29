@@ -126,8 +126,8 @@ else if (resource != null)
                          AppointmentSelect="@OnAppointmentSelect"
                          AppointmentRender="@OnAppointmentRender">
 
-            <RadzenDayView />
-            <RadzenWeekView />
+            <RadzenDayView StartTime="TimeSpan.FromHours(0)" EndTime="TimeSpan.FromHours(24)" />
+            <RadzenWeekView StartTime="TimeSpan.FromHours(0)" EndTime="TimeSpan.FromHours(24)" />
             <RadzenMonthView />
         </RadzenScheduler>
     </RadzenCard>
