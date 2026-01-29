@@ -50,9 +50,11 @@ else
 
                 <RadzenDataGridColumn TItem="ReservationDTO" Title="Actions" TextAlign="TextAlign.Center" Width="100px">
                     <Template Context="data">
+                        <div @onclick:stopPropagation>
                         <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Small"
                                       Click="@(args => ConfirmCancel(data))"
                                       ToolTip="Cancel Reservation" />
+                        </div>
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
